@@ -10,7 +10,7 @@ body {
     display: grid;
     height: 100%;
     grid-template-columns: repeat(10, 1fr);
-    grid-template-rows: 80px auto auto 80px;
+    grid-auto-rows: 80px auto auto 80px;
     background-color: pink;
     grid-gap: 3px
 }
@@ -63,4 +63,66 @@ body {
 
 .grad-hf {
     background-image: linear-gradient(to bottom right, rgb(118, 93, 221), rgb(125, 104, 221), rgb(141, 122, 229));
+}
+
+@media screen and (max-width: 860px) {
+    .container {
+        grid-template-columns: repeat(12, 1fr);
+    }
+
+    .sidebar {
+        grid-column: 1 / 5;
+        grid-row: 2 / span 2;
+    }
+
+    .content-1 {
+        grid-column: 5 / -1;
+    }
+
+    .content-2 {
+        grid-column: 5 / span 4;
+    }
+
+    .content-3 {
+        grid-column: 9 / span 4;
+    }
+}
+
+@media screen and (max-width: 685px) {
+    .container {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        grid-template-rows: repeat(6, 1fr);
+        grid-template-areas:
+            "h"
+            "s"
+            "c"
+            "a"
+            "b"
+            "f";
+
+    }
+
+    .header {
+        grid-area: h;
+    }
+
+    .sidebar {
+        grid-area: s;
+    }
+
+    .content-1 {
+        grid-area: c;
+    }
+
+    .content-2 {
+        grid-area: a;
+    }
+
+    .content-3 {
+        grid-area: b;
+    }
+
+    .footer {
+        grid-area: f;
+    }
 }
