@@ -1,0 +1,548 @@
+@font-face {
+  font-family: "Quicksand";
+  src: url("../fonts/Quicksand-VariableFont_wght.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: optional;
+}
+/* Resetting Default Styles */
+*,
+html,
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+/* Setting Global Default */
+body {
+  background-color: #eeeeee;
+  font-family: "Quicksand", sans-serif;
+  height: 100vh;
+  width: 100%;
+}
+
+/* Header */
+header {
+  width: 100%;
+  background-image: url("assets/header pattern image.png");
+  background-color: #000;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  min-height: 3.5rem;
+  padding-right: 1.5rem;
+}
+header::before {
+  content: "";
+  position: absolute;
+  display: block;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+header .logo {
+  margin: 15px 0px 10px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Navbar*/
+nav {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-left: auto;
+  gap: 2rem;
+  z-index: 10;
+}
+nav a {
+  position: relative;
+  text-decoration: none;
+  text-transform: uppercase;
+  text-align: center;
+  font: normal normal 600 0.875em/0.875em "Quicksand";
+  letter-spacing: 0;
+  color: #3FD28B;
+  opacity: 1;
+}
+nav .item {
+  position: relative;
+}
+nav .item.active a {
+  color: #fff;
+}
+nav .item.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -21px;
+  background-color: #fff;
+  width: 100%;
+  height: 0.25rem;
+}
+
+/* Notification bar */
+.notification {
+  margin-left: 2rem;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  gap: 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+#menu-button {
+  all: unset;
+  display: none;
+  position: relative;
+  z-index: 15;
+}
+#menu-button img {
+  background: transparent;
+  cursor: pointer;
+  z-index: 15;
+}
+
+.alert-count {
+  position: absolute;
+  top: -5px;
+  left: 12px;
+  right: 0;
+  background-color: #2a7ff3;
+  border-radius: 50%;
+  height: 1rem;
+  width: 1rem;
+  font-size: 0.75rem;
+  text-align: center;
+  color: #ffffff;
+}
+
+.announcement-count {
+  position: absolute;
+  top: -5px;
+  right: 50px;
+  background-color: #2a7ff3;
+  border-radius: 50%;
+  height: 1rem;
+  width: 1rem;
+  font-size: 0.75rem;
+  text-align: center;
+  color: #ffffff;
+}
+
+.profile-count {
+  position: absolute;
+  top: -5px;
+  right: -2px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  height: 1rem;
+  width: 1rem;
+  font-size: 0.75rem;
+  text-align: center;
+  color: #000000;
+}
+
+/* Dashboard Content */
+.dashboard {
+  width: 100%;
+  height: 100%;
+  padding: 1.25rem;
+  padding-bottom: 2rem;
+}
+
+.dashboard-heading {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  flex-direction: row;
+  min-height: 4rem;
+  background: #8DDC97 0% 0% no-repeat padding-box;
+  border-radius: 2px;
+}
+
+.head-item {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  padding: 1rem;
+  gap: 0.5rem;
+  flex: 1 1 50%;
+}
+.head-item.is-active::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  left: 0;
+  bottom: 1px;
+  height: 0.25rem;
+  background: #222222 0% 0% no-repeat padding-box;
+  opacity: 1;
+}
+
+.count {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.count h3 {
+  text-align: left;
+  font: normal normal 700 1.5em/1.75em "Quicksand";
+  letter-spacing: 0;
+  color: #222222;
+  opacity: 1;
+}
+.count p {
+  text-align: left;
+  font: normal normal 600 0.1em/1.25em "Quicksand";
+  letter-spacing: 0;
+  color: #222222;
+  opacity: 1;
+}
+
+/* Sort Section */
+.info-and-sort {
+  padding: 1.5rem 0 1.05rem 0;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-wrap: wrap-reverse;
+  flex-direction: row;
+  min-height: 1.75rem;
+}
+
+.courses-info {
+  align-self: flex-end;
+  justify-self: flex-end;
+  text-align: left;
+  font: normal normal 600 0.75em/0.875em "Quicksand";
+  letter-spacing: 0;
+  color: #686868;
+  opacity: 1;
+}
+
+.sort-controls {
+  margin-left: auto;
+}
+.sort-controls span {
+  text-align: left;
+  font: normal normal 600 0.75rem/1rem "Quicksand";
+  letter-spacing: 0;
+  color: #686868;
+  opacity: 1;
+}
+.sort-controls .sort-select {
+  text-align: left;
+  font: normal normal 600 1rem/1.25em "Quicksand";
+  letter-spacing: 0;
+  color: #333333;
+  opacity: 1;
+  padding-right: 3.375rem;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  outline: none;
+  border: none;
+  background: transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  padding-bottom: 4px;
+  margin-right: 1.5rem;
+  background-image: url("assets/icons/arrow-down.svg");
+  background-repeat: no-repeat;
+  background-position: right;
+}
+
+.arrow-down {
+  width: 12px;
+  height: 24px;
+  border: none;
+  letter-spacing: -0.6px;
+  color: #1F7A54;
+  opacity: 1;
+}
+
+.hr-line {
+  width: 100%;
+  height: 1px;
+  background: #000000 0% 0% no-repeat padding-box;
+  opacity: 0.12;
+}
+
+.courses-grid {
+  margin-top: 1rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  flex-direction: row;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.course-card {
+  background: #ffffff;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  opacity: 1;
+  flex: 1 1 29.75em;
+  max-width: 517px;
+}
+
+.card-content {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem 1.5rem 0.56rem 1.5rem;
+}
+
+.card-main {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  width: 100%;
+  gap: 1rem;
+}
+
+.card-details {
+  width: 100%;
+}
+
+.card-head {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+.card-head .star-icon {
+  margin-left: auto;
+}
+.card-head .star-icon-gray {
+  filter: grayscale(1);
+}
+.card-head .topic {
+  text-align: left;
+  font: normal normal 600 1rem/1.25rem "Quicksand";
+  letter-spacing: 0px;
+  color: #222222;
+  opacity: 1;
+}
+
+.card-details .card-subject {
+  text-align: left;
+  font: normal normal 600 0.75rem/1rem "Quicksand";
+  margin-bottom: 0.5rem;
+  letter-spacing: 0px;
+  color: #666666;
+  opacity: 1;
+}
+.card-details .card-subject .vr {
+  margin-right: 0.5rem;
+}
+.card-details .subject {
+  margin-right: 0.5rem;
+}
+.card-details .point {
+  color: #1F7A54;
+}
+
+.vr {
+  display: inline-block;
+  width: 1px;
+  height: 12px;
+  background: #000000 0% 0% no-repeat padding-box;
+  opacity: 0.12;
+}
+
+.grade {
+  margin-right: 0.125rem;
+}
+
+.class-stats {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.125rem;
+}
+.class-stats p {
+  text-align: left;
+  font: normal normal 600 0.75rem/1rem "Quicksand";
+  letter-spacing: 0px;
+  color: #666666;
+}
+.class-stats span {
+  color: #222222;
+  font-weight: 800;
+}
+
+.class-select {
+  width: 100%;
+}
+.class-select select {
+  width: 100%;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  outline: none;
+  border: none;
+  text-align: left;
+  font: normal normal 600 1rem/1.25rem "Quicksand";
+  letter-spacing: 0px;
+  color: #222222;
+  background-image: url("assets/icons/arrow-down.svg");
+  background-repeat: no-repeat;
+  background-position: right;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.38);
+  padding-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.class-info {
+  display: flex;
+  gap: 0.5rem;
+  text-align: left;
+  font: normal normal 600 0.75rem/1rem "Quicksand";
+  letter-spacing: 0px;
+  color: #666666;
+  opacity: 1;
+}
+
+.card-footer {
+  display: flex;
+  height: 2.5rem;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+/* Footer Section */
+.information {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+.information .about a {
+  text-align: center;
+  font: normal normal 600 0.875em/1.125em "Quicksand";
+  letter-spacing: 0;
+  text-decoration: none;
+  color: #1F7A54;
+  opacity: 1;
+}
+.information .contact a {
+  text-align: center;
+  font: normal normal 600 0.875em/1.125em "Quicksand";
+  letter-spacing: 0px;
+  text-decoration: none;
+  color: #1F7A54;
+  opacity: 1;
+}
+
+.line-i {
+  height: 1.125em;
+  border: 1px solid rgba(0, 0, 0, 0.1215686275);
+  opacity: 1;
+}
+
+.line-f {
+  height: 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.1215686275);
+  opacity: 1;
+}
+
+.footer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  flex-direction: row;
+  background: #E0E1E1 0% 0% no-repeat padding-box;
+  opacity: 1;
+}
+
+.footer img {
+  margin: 14.5px;
+}
+
+.details {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-wrap: wrap;
+  flex-direction: row;
+  padding-left: 10px;
+  text-align: center;
+}
+
+.copyright {
+  text-align: left;
+  flex: 1 1 auto;
+  font: normal normal 600 0.75em/1em "Quicksand";
+  letter-spacing: 0px;
+  color: #616161;
+  opacity: 1;
+}
+
+.zeus-info {
+  text-align: left;
+  flex: 1 1 auto;
+  font: normal normal bold 0.75em/1em "Quicksand";
+  letter-spacing: 0px;
+  color: #616161;
+  opacity: 1;
+  margin: 0 10px;
+}
+
+.rights {
+  flex: 1 1 auto;
+  font: normal normal 600 0.75em/1em "Quicksand";
+  letter-spacing: 0px;
+  color: #616161;
+  opacity: 1;
+}
+
+@media screen and (max-width: 800px) {
+  nav,
+  .notification {
+    display: none;
+  }
+  #menu-button {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+  }
+  .line-f {
+    display: none;
+  }
+}
+@media screen and (max-width: 420px) {
+  .card-main {
+    flex-wrap: wrap;
+  }
+}/*# sourceMappingURL=teacher-dashboard.css.map */
