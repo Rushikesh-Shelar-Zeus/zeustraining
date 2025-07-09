@@ -351,7 +351,8 @@ nav .item.active::after {
   margin-left: auto;
 }
 
-.card-head .star-icon-gray {
+.card-head .star-icon.gray {
+  margin-left: auto;
   filter: grayscale(1);
 }
 
@@ -550,6 +551,7 @@ nav .item.active::after {
 
 
 @media screen and (max-width: 800px) {
+
   nav,
   .notification {
     display: none;
@@ -567,8 +569,8 @@ nav .item.active::after {
 
 }
 
-@media screen and (max-width: 420px){
-  .card-main{
+@media screen and (max-width: 420px) {
+  .card-main {
     flex-wrap: wrap
   }
 }

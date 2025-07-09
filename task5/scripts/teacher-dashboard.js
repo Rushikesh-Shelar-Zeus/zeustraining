@@ -20,8 +20,4 @@ links.forEach(link => {
     });
 });
 
-// window.addEventListener('resize', () => {
-//     if (window.innerWidth > 768) {
-//         handleMobileMenu()
-//     }
-// });
+
