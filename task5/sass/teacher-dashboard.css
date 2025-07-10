@@ -12,7 +12,6 @@ body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-size: 16px;
 }
 
 /* Setting Global Default */
@@ -21,12 +20,13 @@ body {
   font-family: "Quicksand", sans-serif;
   height: 100vh;
   width: 100%;
+  font-size: 16px;
 }
 
 /* Header */
 header {
   width: 100%;
-  background-image: url("assets/header pattern image.png");
+  background-image: url("../assets/header pattern image.png");
   background-color: #000;
   position: relative;
   display: flex;
@@ -67,7 +67,10 @@ nav a {
   text-decoration: none;
   text-transform: uppercase;
   text-align: center;
-  font: normal normal 600 0.875em/0.875em "Quicksand";
+  font-weight: 600;
+  font-size: 0.875em;
+  font-family: "Quicksand", "sans-serif";
+  line-height: 0.875em;
   letter-spacing: 0;
   color: #3FD28B;
   opacity: 1;
@@ -82,7 +85,7 @@ nav .item.active::after {
   content: "";
   position: absolute;
   left: 0;
-  bottom: -21px;
+  bottom: -22px;
   background-color: #fff;
   width: 100%;
   height: 0.25rem;
@@ -130,7 +133,7 @@ nav .item.active::after {
 .announcement-count {
   position: absolute;
   top: -5px;
-  right: 50px;
+  right: 45px;
   background-color: #2a7ff3;
   border-radius: 50%;
   height: 1rem;
@@ -156,7 +159,7 @@ nav .item.active::after {
 /* Dashboard Content */
 .dashboard {
   width: 100%;
-  height: 100%;
+  min-height: 89vh;
   padding: 1.25rem;
   padding-bottom: 2rem;
 }
@@ -166,7 +169,7 @@ nav .item.active::after {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   flex-direction: row;
   min-height: 4rem;
   background: #8DDC97 0% 0% no-repeat padding-box;
@@ -195,6 +198,15 @@ nav .item.active::after {
   background: #222222 0% 0% no-repeat padding-box;
   opacity: 1;
 }
+.head-item .icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.head-item .icon img {
+  width: 1.25em;
+  height: 2em;
+}
 
 .count {
   display: flex;
@@ -203,14 +215,20 @@ nav .item.active::after {
 }
 .count h3 {
   text-align: left;
-  font: normal normal 700 1.5em/1.75em "Quicksand";
+  font-weight: 700;
+  font-size: 1.5rem;
+  font-family: "Quicksand", "sans-serif";
+  line-height: 1.75rem;
   letter-spacing: 0;
   color: #222222;
   opacity: 1;
 }
 .count p {
   text-align: left;
-  font: normal normal 600 0.1em/1.25em "Quicksand";
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: "Quicksand", "sans-serif";
+  line-height: 1.25rem;
   letter-spacing: 0;
   color: #222222;
   opacity: 1;
@@ -221,36 +239,42 @@ nav .item.active::after {
   padding: 1.5rem 0 1.05rem 0;
   width: 100%;
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: flex-start;
   flex-wrap: wrap-reverse;
   flex-direction: row;
   min-height: 1.75rem;
+  gap: 0.5rem;
 }
 
 .courses-info {
-  align-self: flex-end;
   justify-self: flex-end;
   text-align: left;
-  font: normal normal 600 0.75em/0.875em "Quicksand";
+  font-weight: 600;
+  font-size: 0.75em;
+  font-family: "Quicksand", "sans-serif";
+  line-height: 0.875em;
   letter-spacing: 0;
   color: #686868;
   opacity: 1;
 }
 
-.sort-controls {
-  margin-left: auto;
-}
 .sort-controls span {
   text-align: left;
-  font: normal normal 600 0.75rem/1rem "Quicksand";
+  font-weight: 600;
+  font-size: 0.75rem;
+  font-family: "Quicksand", "sans-serif";
+  line-height: 1rem;
   letter-spacing: 0;
   color: #686868;
   opacity: 1;
 }
 .sort-controls .sort-select {
   text-align: left;
-  font: normal normal 600 1rem/1.25em "Quicksand";
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: "Quicksand", "sans-serif";
+  line-height: 1.25em;
   letter-spacing: 0;
   color: #333333;
   opacity: 1;
@@ -264,7 +288,7 @@ nav .item.active::after {
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
   padding-bottom: 4px;
   margin-right: 1.5rem;
-  background-image: url("assets/icons/arrow-down.svg");
+  background-image: url("../assets/icons/arrow-down.svg");
   background-repeat: no-repeat;
   background-position: right;
 }
@@ -303,7 +327,7 @@ nav .item.active::after {
   overflow: hidden;
   position: relative;
   opacity: 1;
-  flex: 1 1 29.75em;
+  flex: 1 1 476px;
   max-width: 517px;
 }
 
@@ -327,6 +351,10 @@ nav .item.active::after {
   width: 100%;
   gap: 1rem;
 }
+.card-main .card-img {
+  width: 132px;
+  height: 157px;
+}
 
 .card-details {
   width: 100%;
@@ -340,8 +368,10 @@ nav .item.active::after {
 }
 .card-head .star-icon {
   margin-left: auto;
+  cursor: pointer;
 }
-.card-head .star-icon-gray {
+.card-head .star-icon.gray {
+  margin-left: auto;
   filter: grayscale(1);
 }
 .card-head .topic {
@@ -412,7 +442,7 @@ nav .item.active::after {
   font: normal normal 600 1rem/1.25rem "Quicksand";
   letter-spacing: 0px;
   color: #222222;
-  background-image: url("assets/icons/arrow-down.svg");
+  background-image: url("../assets/icons/arrow-down.svg");
   background-repeat: no-repeat;
   background-position: right;
   border-bottom: 1px solid rgba(0, 0, 0, 0.38);
@@ -432,10 +462,15 @@ nav .item.active::after {
 
 .card-footer {
   display: flex;
+  width: 100%;
+  padding: 0 1.5rem;
   height: 2.5rem;
   justify-content: space-between;
   align-items: flex-end;
   border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+.card-footer .disabled {
+  opacity: 0.4;
 }
 
 /* Footer Section */
@@ -503,7 +538,7 @@ nav .item.active::after {
 .copyright {
   text-align: left;
   flex: 1 1 auto;
-  font: normal normal 600 0.75em/1em "Quicksand";
+  font: normal normal 550 0.75em/1em "Quicksand";
   letter-spacing: 0px;
   color: #616161;
   opacity: 1;
@@ -512,7 +547,7 @@ nav .item.active::after {
 .zeus-info {
   text-align: left;
   flex: 1 1 auto;
-  font: normal normal bold 0.75em/1em "Quicksand";
+  font: normal normal 700 0.75em/1em "Quicksand";
   letter-spacing: 0px;
   color: #616161;
   opacity: 1;
@@ -521,18 +556,21 @@ nav .item.active::after {
 
 .rights {
   flex: 1 1 auto;
-  font: normal normal 600 0.75em/1em "Quicksand";
+  font: normal normal 550 0.75em/1em "Quicksand";
   letter-spacing: 0px;
   color: #616161;
   opacity: 1;
 }
 
 @media screen and (max-width: 800px) {
-  nav,
-  .notification {
+  nav {
     display: none;
   }
+  .notification {
+    margin-left: auto;
+  }
   #menu-button {
+    margin-left: 2rem;
     display: flex;
     justify-content: center;
     align-content: center;
@@ -544,5 +582,8 @@ nav .item.active::after {
 @media screen and (max-width: 420px) {
   .card-main {
     flex-wrap: wrap;
+  }
+  .notification {
+    display: none;
   }
 }/*# sourceMappingURL=teacher-dashboard.css.map */

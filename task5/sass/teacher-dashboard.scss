@@ -30,7 +30,10 @@
 
 @mixin font($textAlign: left, $fontWeight: 400, $fontSize: 16px, $lineHeight: 16px, $textSpacing: 0, $color: #222222, $opacity: 1, $fontFamily: 'Quicksand', $fontStyle: normal, $fontVariant: normal) {
     text-align: $textAlign;
-    font: $fontStyle $fontVariant $fontWeight #{$fontSize} / #{$lineHeight} $fontFamily;
+    font-weight: $fontWeight;
+    font-size: $fontSize;
+    font-family: 'Quicksand', 'sans-serif';
+    line-height: $lineHeight;
     letter-spacing: $textSpacing;
     color: $color;
     opacity: $opacity;
@@ -39,7 +42,7 @@
 /* Header */
 header {
     width: 100%;
-    background-image: url("assets/header\ pattern\ image.png");
+    background-image: url("../assets/header\ pattern\ image.png");
     background-color: #000;
     position: relative;
     @include flex(space-between, center);
@@ -92,7 +95,7 @@ nav {
                 content: "";
                 position: absolute;
                 left: 0;
-                bottom: -21px;
+                bottom: -22px;
                 background-color: #fff;
                 width: 100%;
                 height: 0.25rem;
@@ -129,17 +132,17 @@ nav {
 }
 
 .announcement-count {
-    @include notification(-5px, 50px, #2a7ff3, #ffffff);
+    @include notification(-5px, 45px, #2a7ff3, #ffffff);
 }
 
 .profile-count {
-    @include notification(-5px, -2px, #ffffff, #000000);
+    @include notification(-5px, -2px, #ffffff, #000000, 8px);
 }
 
 /* Dashboard Content */
 .dashboard {
     width: 100%;
-    height: 100%;
+    min-height: 89vh;
     padding: 1.25rem;
     padding-bottom: 2rem;
 }
@@ -147,7 +150,7 @@ nav {
 
 .dashboard-heading {
     width: 100%;
-    @include flex(space-around, center, wrap);
+    @include flex(space-around, center);
     min-height: 4rem;
     background: #8DDC97 0% 0% no-repeat padding-box;
     border-radius: 2px;
@@ -173,6 +176,17 @@ nav {
             opacity: 1;
         }
     }
+
+    .icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        img {
+            width: 1.25em;
+            height: 2em;
+        }
+    }
 }
 
 .count {
@@ -181,11 +195,11 @@ nav {
     gap: 0.5rem;
 
     h3 {
-        @include font(left, 700, 1.5em, 1.75em, 0);
+        @include font(left, 700, 1.5rem, 1.75rem, 0);
     }
 
     p {
-        @include font(left, 600, 0.1em, 1.25em, 0);
+        @include font(left, 600, 1rem, 1.25rem, 0);
     }
 }
 
@@ -194,19 +208,17 @@ nav {
 .info-and-sort {
     padding: 1.5rem 0 1.05rem 0;
     width: 100%;
-    @include flex($wrap: wrap-reverse);
+    @include flex($wrap: wrap-reverse, $justify: space-between);
     min-height: 1.75rem;
+    gap: 0.5rem;
 }
 
 .courses-info {
-    align-self: flex-end;
     justify-self: flex-end;
     @include font(left, 600, 0.75em, 0.875em, 0, #686868);
 }
 
 .sort-controls {
-    margin-left: auto;
-
     span {
         @include font(left, 600, 0.75rem, 1rem, 0, #686868);
     }
@@ -221,7 +233,7 @@ nav {
         border-bottom: 1px solid rgba(0, 0, 0, 0.12);
         padding-bottom: 4px;
         margin-right: 1.5rem;
-        background-image: url('assets/icons/arrow-down.svg');
+        background-image: url('../assets/icons/arrow-down.svg');
         background-repeat: no-repeat;
         background-position: right;
     }
@@ -259,7 +271,7 @@ nav {
     overflow: hidden;
     position: relative;
     opacity: 1;
-    flex: 1 1 29.75em;
+    flex: 1 1 476px;
     max-width: 517px;
 }
 
@@ -271,9 +283,14 @@ nav {
 }
 
 .card-main {
-    @include flex($justify:center);
+    @include flex($justify: center);
     width: 100%;
     gap: 1rem;
+
+    .card-img {
+        width: 132px;
+        height: 157px;
+    }
 }
 
 .card-details {
@@ -288,10 +305,12 @@ nav {
 
     .star-icon {
         margin-left: auto;
-    }
+        cursor: pointer;
 
-    .star-icon-gray {
-        filter: grayscale(1);
+        &.gray {
+            margin-left: auto;
+            filter: grayscale(1);
+        }
     }
 
     .topic {
@@ -368,7 +387,7 @@ nav {
         font: normal normal 600 1rem/1.25rem 'Quicksand';
         letter-spacing: 0px;
         color: #222222;
-        background-image: url('assets/icons/arrow-down.svg');
+        background-image: url('../assets/icons/arrow-down.svg');
         background-repeat: no-repeat;
         background-position: right;
         border-bottom: 1px solid rgba(0, 0, 0, 0.38);
@@ -389,10 +408,16 @@ nav {
 
 .card-footer {
     display: flex;
+    width: 100%;
+    padding: 0 1.5rem;
     height: 2.5rem;
     justify-content: space-between;
     align-items: flex-end;
     border-top: 1px solid rgba(0, 0, 0, 0.12);
+
+    .disabled {
+        opacity: 0.4;
+    }
 }
 
 /* Footer Section */
@@ -459,7 +484,7 @@ nav {
 .copyright {
     text-align: left;
     flex: 1 1 auto;
-    font: normal normal 600 0.75em/1em 'Quicksand';
+    font: normal normal 550 0.75em/1em 'Quicksand';
     letter-spacing: 0px;
     color: #616161;
     opacity: 1;
@@ -468,7 +493,7 @@ nav {
 .zeus-info {
     text-align: left;
     flex: 1 1 auto;
-    font: normal normal bold 0.75em/1em 'Quicksand';
+    font: normal normal 700 0.75em/1em 'Quicksand';
     letter-spacing: 0px;
     color: #616161;
     opacity: 1;
@@ -477,7 +502,7 @@ nav {
 
 .rights {
     flex: 1 1 auto;
-    font: normal normal 600 0.75em/1em 'Quicksand';
+    font: normal normal 550 0.75em/1em 'Quicksand';
     letter-spacing: 0px;
     color: #616161;
     opacity: 1;
@@ -486,12 +511,16 @@ nav {
 
 @media screen and (max-width: 800px) {
 
-    nav,
-    .notification {
+    nav {
         display: none;
     }
 
+    .notification {
+        margin-left: auto;
+    }
+
     #menu-button {
+        margin-left: 2rem;
         display: flex;
         justify-content: center;
         align-content: center;
@@ -506,5 +535,9 @@ nav {
 @media screen and (max-width: 420px) {
     .card-main {
         flex-wrap: wrap
+    }
+
+    .notification {
+        display: none;
     }
 }
