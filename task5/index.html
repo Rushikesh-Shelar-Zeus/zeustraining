@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <section class="container">
+        <header>
+            <img src="./assets/icons/logo used in header.svg" class="logo" />
+        </header>
+
+        <div class="login">
+            <div class="login-content">
+                <div class="heading">
+                    <div class="arrow-left">
+                        <img src="./assets/icons/back.svg" alt="" />
+                    </div>
+                    <div class="info">Log in with Quantum</div>
+                </div>
+                <form action="#">
+                    <div class="radio-group form-element">
+                        <div class="radio-button">
+                            <input type="radio" name="school" id="district-school">
+                            <label for="district-school">District</label>
+                        </div>
+                        <div class="radio-button">
+                            <input type="radio" name="school" id="independent-school">
+                            <label for="independent-school">Independent school</label>
+                        </div>
+                    </div>
+                    <div class="select form-element">
+                        <label for="states">State*</label>
+                        <select name="region" id="states">
+                            <option value="alabama">Alabama</option>
+                            <option value="maharashtra">Maharashtra</option>
+                            <option value="uttar-pradesh">Uttar Pradesh</option>
+                            <option value="himachal-pradesh">Himchal Pradesh</option>
+                            <option value="uttarakhand">Uttarakhand</option>
+                        </select>
+                    </div>
+                    <div class="select form-element">
+                        <label for="district">District*</label>
+                        <select name="region" id="district">
+                            <option value="alabama">Alabama School District</option>
+                        </select>
+                    </div>
+                    <div class="form-element username">
+                        <div class="text-input">
+                            <input placeholder="Username/Email ID*" type="text" name="username" id="username" />
+                        </div>
+                        <a href="#" class="forgot-links">Forgot username?</a>
+                    </div>
+                    <div class="form-element">
+                        <div class="text-input password-box">
+                            <input placeholder="Password*" type="password" name="password" id="password" />
+                            <img src="./assets/icons/preview.svg" alt="" class="password-eye"
+                                onclick="togglePassword()" />
+                        </div>
+                        <a href="#" class="forgot-links">Forgot password?</a>
+                    </div>
+                    <div class="form-element remember-me">
+                        <input type="checkbox" name="remember" id="remember" />
+                        <label for="remember">Remember me</label>
+                    </div>
+
+                    <div class="form-element button-container">
+                        <button type="submit" id="login-button" class="login-button">
+                            Log in
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="information">
+            <div class="about"><a href="#">About </a></div>
+            <div class="line-i"></div>
+            <div class="contact"><a href="#"> Contact Us</a></div>
+        </div>
+
+        <div class="footer">
+            <img src="assets/icons/logo used in footer.svg" class="footer-logo" alt="" />
+            <div class="line-f"></div>
+
+            <div class="details">
+                <div class="copyright">Copyright © 2020 2021</div>
+                <div class="zeus-info">Zeus Systems Pvt. Ltd.</div>
+                <div class="rights">All rights reserved</div>
+            </div>
+        </div>
+    </section>
+</body>
+<script src=""></script>
+
+</html>

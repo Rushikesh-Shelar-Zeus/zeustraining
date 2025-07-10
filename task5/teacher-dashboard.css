@@ -1,0 +1,914 @@
+@font-face {
+  font-family: "Quicksand";
+  src: url("fonts/Quicksand-VariableFont_wght.ttf") format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Resetting Default Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Setting Global Default */
+body {
+  background-color: #eeeeee;
+  font-family: "Quicksand", sans-serif;
+  height: 100vh;
+}
+
+
+/* Header */
+header {
+  width: 100%;
+  background-image: url("assets/header\ pattern\ image.png");
+  background-color: #000;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 56px;
+  padding: 0 24px;
+}
+
+header::before {
+  content: "";
+  position: absolute;
+  display: block;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Quantum Logo */
+header .logo {
+  position: relative;
+}
+
+/* Navbar*/
+nav {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-left: auto;
+  gap: 32px;
+  z-index: 10;
+}
+
+nav a {
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  font: normal normal 600 14px/14px 'Quicksand';
+  letter-spacing: 0px;
+  color: #3FD28B;
+  opacity: 1;
+}
+
+nav .item {
+  position: relative;
+}
+
+/* TODO: Active Class Not Working */
+nav a.item.active {
+  color: #fff;
+}
+
+nav .item.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -19px;
+  background-color: #fff;
+  width: 100%;
+  height: 4px;
+}
+
+/* Notification bar */
+.notification {
+  margin-left: 32px;
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  position: relative;
+  z-index: 2;
+}
+
+
+.menu {
+  display: none;
+  position: relative;
+  z-index: 15;
+}
+
+.menu .menu-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.content-of-dashbord {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+
+.alert-count {
+  position: absolute;
+  top: -5px;
+  left: 12px;
+  background-color: #2a7ff3;
+  border-radius: 50%;
+  height: 16px;
+  width: 16px;
+  font-size: 12px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.announcement-count {
+  position: absolute;
+  top: -5px;
+  right: 50px;
+  background-color: #2a7ff3;
+  border-radius: 50%;
+  height: 16px;
+  width: 16px;
+  font-size: 12px;
+  text-align: center;
+  color: #ffffff;
+}
+
+
+.profile-count {
+  position: absolute;
+  top: -5px;
+  right: -2px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  height: 16px;
+  width: 16px;
+  font-size: 12px;
+  text-align: center;
+  color: #000000;
+}
+
+/* Dashboard Content */
+.dashboard {
+  width: 100%;
+  height: 100vh;
+  padding: 24px;
+  padding-bottom: 33px;
+}
+
+
+.dashboard-heading {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 64px;
+  background: #8DDC97 0% 0% no-repeat padding-box;
+  border-radius: 2px;
+  opacity: 1;
+  flex: 1 1 50%;
+
+}
+
+.head-item {
+  position: relative;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  gap: 8px;
+}
+
+.head-item.is-active::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  left: 0;
+  bottom: 2px;
+  height: 4px;
+  background: #222222 0% 0% no-repeat padding-box;
+  opacity: 1;
+}
+
+.count {
+  display: flex;
+  align-items: center;
+  gap: 8px
+}
+
+.count h3 {
+  text-align: left;
+  font: normal normal 700 24px/28px 'Quicksand';
+  letter-spacing: 0px;
+  color: #222222;
+  opacity: 1;
+}
+
+.count p {
+  text-align: left;
+  font: normal normal 600 16px/20px 'Quicksand';
+  letter-spacing: 0px;
+  color: #222222;
+  opacity: 1;
+}
+
+
+/* Sort Section */
+.info-and-sort {
+  padding: 24px 0 17px 0;
+  width: 100%;
+  display: flex;
+  min-height: 28px;
+}
+
+.courses-info {
+  align-self: flex-end;
+  text-align: left;
+  font: normal normal 600px 12px/14px 'Quicksand';
+  letter-spacing: 0px;
+  color: #686868;
+  opacity: 1;
+}
+
+.sort-controls {
+  margin-left: auto;
+}
+
+.sort-controls span {
+  text-align: left;
+  font: normal normal 600 12px/16px 'Quicksand';
+  letter-spacing: 0px;
+  color: #686868;
+  opacity: 1;
+}
+
+
+.sort-controls .sort-select {
+  text-align: left;
+  font: normal normal 600 16px/20px 'Quicksand';
+  letter-spacing: 0px;
+  color: #333333;
+  opacity: 1;
+  padding-right: 54px;
+  appearance: none;
+  outline: none;
+  border: none;
+  background: transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  padding-bottom: 4px;
+  margin-right: 24px;
+  background-image: url('assets/icons/arrow-down.svg');
+  background-repeat: no-repeat;
+  background-position: right;
+}
+
+
+.arrow-down {
+  width: 12px;
+  height: 24px;
+  border: none;
+  letter-spacing: -0.6px;
+  color: #1F7A54;
+  opacity: 1;
+}
+
+
+.hr-line {
+  width: 100%;
+  height: 1px;
+  background: #000000 0% 0% no-repeat padding-box;
+  opacity: 0.12;
+}
+
+
+.courses-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(476px, 1fr));
+  grid-auto-rows: initial;
+  gap: 24px;
+  margin-bottom: 33px;
+}
+
+.course-card {
+  background: #ffffff;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  opacity: 1;
+}
+
+.card-img{
+  padding: 24px 16px 16px 24px;
+}
+
+
+.card-footer{
+  margin: 0 24px 9px 24px;
+  padding-bottom: 9px;
+  display: flex;
+  height: 40px;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-top: 1px solid rgba(0,0,0, 0.12);
+}
+
+
+
+
+
+/* .stats-section {
+  
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 600;
+  font-style: normal;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.stat-item {
+  font-family: "Quicksand";
+  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-info h3 {
+  font-size: 24px;
+  line-height: 28px;
+  font-weight: bold;
+}
+
+.stat-info p {
+  font-family: "Quicksand";
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+#courses.courses-active::after {
+  content: "";
+  position: absolute;
+  top: 60px;
+  left: 0px;
+  width: 47.3%;
+  height: 4px;
+  background-color: #222222;
+}
+
+#classes.classes-active::after {
+  content: "";
+  position: absolute;
+  top: 60px;
+  right: 0px;
+  width: 47.3%;
+  height: 4px;
+  background-color: #222222;
+}
+
+.courses-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 24px 24px 17px;
+  font-weight: 600;
+  color: #686868;
+}
+
+.courses-info {
+  color: #666666;
+  font-size: 14px;
+}
+
+.sort-controls {
+  font-size: 12px;
+  line-height: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sort-select {
+  width: 10rem;
+  height: 30px;
+  border: none;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #eeeeee;
+  outline: none;
+  color: #222222;
+  font-family: "Quicksand";
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: 0px;
+  opacity: 1;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("../assets/icons/arrow-down.svg");
+  background-repeat: no-repeat;
+  background-position: right -5px center;
+}
+
+.sort-btn {
+  border: 0px;
+}
+
+.line {
+  margin: 0px 24px 17px 24px;
+  border-bottom: 1px solid #686868;
+  opacity: 0.12;
+}
+
+.courses-grid {
+  padding: 0px 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(476px, 1fr));
+  gap: 24px;
+  margin-bottom: 3rem;
+}
+
+.course-card {
+  background: #ffffff;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.star-gray-icon {
+  position: absolute;
+  top: 1.5rem;
+  right: 1rem;
+  font-size: 20px;
+  filter: grayscale(1);
+  opacity: 0.4;
+}
+
+.course-image {
+  width: 132px;
+  height: 157px;
+  position: relative;
+  overflow: hidden;
+}
+
+.image-and-info {
+  display: flex;
+  gap: 1rem;
+}
+
+.course-content {
+  padding: 1.5rem 1.5rem 0.6rem;
+}
+
+.course-info {
+  font-size: 12px;
+  line-height: 14px;
+  flex: 1;
+}
+
+.add-grade {
+  color: #1f7a54;
+}
+
+.course-title {
+  width: 248px;
+  font-family: "Quicksand";
+  font-style: normal;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 20px;
+  color: #222222;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sub-grade {
+  height: 15px;
+  display: flex;
+  margin: 7px 0px;
+  align-items: center;
+  gap: 9px;
+  font-family: "Quicksand";
+  font-style: normal;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 16px;
+  color: #666666;
+}
+
+.sub-grade .sub-line {
+  border-left: 1px solid #666666;
+  opacity: 0.12;
+  height: 12px;
+}
+
+.unit-lessons-topic {
+  display: flex;
+  gap: 6px;
+  font-family: "Quicksand";
+  font-style: normal;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 16px;
+  color: #666666;
+}
+
+.unit-lessons-topic .count {
+  font-style: normal;
+  font-weight: bold;
+  font-size: 12px;
+  line-height: 16px;
+  color: #222222;
+}
+
+.class-info {
+  display: flex;
+  gap: 6px;
+  font-family: "Quicksand";
+  font-style: normal;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 14px;
+  color: #666666;
+  margin: 8px 0px;
+}
+
+.class-info .sub-line {
+  border-left: 1px solid #666666;
+  opacity: 0.12;
+  height: 12px;
+}
+
+.class-selection select {
+  height: 30px;
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #e0e0e0;
+  outline: none;
+  color: #222222;
+  font-family: "Quicksand";
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: 0px;
+  opacity: 1;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("../assets/icons/arrow-down.svg");
+  background-repeat: no-repeat;
+  background-position: right -5px center;
+}
+
+.class-selection .no-class-option {
+  color: #a7a7a7;
+}
+
+.course-class {
+  margin-top: 16px;
+}
+
+.course-actions {
+  display: flex;
+  margin-top: auto;
+  justify-content: space-between;
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #666666;
+}
+
+.star-icon {
+  position: absolute;
+  top: 1.5rem;
+  right: 1rem;
+  color: #ffd700;
+  font-size: 20px;
+}
+
+.low-opacity {
+  opacity: 0.4;
+}
+
+.expired-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #ffe4e6;
+  color: #d80000;
+  width: 52px;
+  height: 18px;
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.course-line {
+  margin: 16px 0px;
+  border-bottom: 1px solid #686868;
+  opacity: 0.12;
+}
+
+.info {
+  display: flex;
+  margin: 16px;
+  justify-content: center;
+}
+
+.info a {
+  text-decoration: none;
+  font-weight: 600;
+  color: #1f7a54;
+  font-size: 14px;
+}
+
+.info .about {
+  margin-right: 10px;
+}
+
+.info .contact {
+  margin-left: 10px;
+}
+
+.middel-line {
+  border-right: 1px solid #d1d1d1;
+}
+
+.foot-text {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.zeus {
+  margin: 0px 10px;
+  font-weight: bold;
+}
+
+.footer-logo {
+  margin-right: 10px;
+}
+
+.footer {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  color: #616161;
+  background-color: #e0e1e1;
+  margin-top: auto;
+}
+
+.footer-about {
+  margin-top: auto;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-bar {
+    flex-wrap: wrap;
+    border-bottom: 2px solid #3ac7ec;
+  }
+
+  .notifications {
+    margin-left: auto;
+  }
+
+  .link-and-arrow {
+    display: flex;
+    width: 250px;
+  }
+
+  .link-and-arrow .arrow {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;
+    width: 280px;
+    gap: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 1rem;
+    background: #ffffff;
+    border-radius: 2px;
+    padding: 0rem 1rem;
+  }
+
+  .nav-links.show {
+    display: flex;
+    animation: slideDown 0.3s ease-out;
+    position: absolute;
+    top: 40px;
+    right: 16px;
+  }
+
+  .nav-links .nav-item.active {
+    color: #1f7a54;
+  }
+
+  .nav-links .nav-item.active::before {
+    content: "";
+    position: absolute;
+    height: 48px;
+    left: -16px;
+    width: 280px;
+    z-index: -1;
+    background-color: #f3f3f3;
+  }
+
+  .nav-links .nav-item.active::after {
+    display: none;
+  }
+
+  .nav-links .nav-item.active .sub-links-show {
+    display: flex;
+    flex-direction: column;
+    margin-left: 16px;
+  }
+
+  .nav-links .nav-item.active .sub-links::before {
+    content: "";
+    position: absolute;
+    height: 48px;
+    left: -16px;
+    width: 280px;
+    z-index: -1;
+    background-color: #f3f3f3;
+  }
+
+  .nav-links .nav-item.active .arrow-roate {
+    transform: rotate(180deg);
+  }
+
+  .nav-links a {
+    height: 48px;
+    display: flex;
+    align-content: center;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    color: #1f7a54;
+  }
+
+  .nav-links a:last-child {
+    border-bottom: none;
+  }
+
+  .courses-grid {
+    margin: 0px 98px;
+  }
+
+  .courses-grid .course-title {
+    width: auto;
+  }
+
+  .menu-icon {
+    display: block;
+  }
+} */
+
+/* Footer Section */
+
+.information {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.information .about a {
+  text-align: center;
+  font: normal normal 600 14px/18px 'Quicksand';
+  letter-spacing: 0px;
+  text-decoration: none;
+  color: #1F7A54;
+  opacity: 1;
+}
+
+.information .contact a {
+  text-align: center;
+  font: normal normal 600 14px/18px 'Quicksand';
+  letter-spacing: 0px;
+  text-decoration: none;
+  color: #1F7A54;
+  opacity: 1;
+}
+
+.line-i {
+  height: 18px;
+  border: 1px solid #0000001F;
+  opacity: 1;
+}
+
+.line-f {
+  height: 24px;
+  border: 1px solid #0000001F;
+  opacity: 1;
+}
+
+.footer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #E0E1E1 0% 0% no-repeat padding-box;
+  opacity: 1;
+
+}
+
+.footer img {
+  margin: 14.5px;
+}
+
+.details {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  padding-left: 10px;
+}
+
+.copyright {
+  text-align: left;
+  font: normal normal 600 12px/16px 'Quicksand';
+  letter-spacing: 0px;
+  color: #616161;
+  opacity: 1;
+}
+
+.zeus-info {
+  text-align: left;
+  font: normal normal bold 12px/16px 'Quicksand';
+  letter-spacing: 0px;
+  color: #616161;
+  opacity: 1;
+  margin: 0 10px;
+}
+
+.rights {
+  font: normal normal 600 12px/16px 'Quicksand';
+  letter-spacing: 0px;
+  color: #616161;
+  opacity: 1;
+}
