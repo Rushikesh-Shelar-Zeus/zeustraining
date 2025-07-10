@@ -1,0 +1,18 @@
+/* Resetting Default Styles */
+*,
+html,
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-size: 16px;
+
+}
+
+/* Setting Global Default */
+body {
+  background-color: #eeeeee;
+  font-family: "Quicksand", sans-serif;
+  height: 100vh;
+  width: 100%;
+}

@@ -1,0 +1,38 @@
+Mobile Nav
+header.mobile {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    background-repeat: repeat-x;
+    position: relative;
+
+}
+
+nav.mobile {
+    display: flex;
+    flex-direction: column;
+    background-color: #222;
+    position: absolute;
+    top: 3.5rem;
+    padding: 1em;
+    width: 100%;
+}
+
+
+nav .item.mobile.active::after {
+  content: "";
+  position: absolute;
+  left: -1rem;
+  top: 0.12rem;
+  background-color: #fff;
+  width: 0.25rem;
+  height: 100%;
+}
+
+
+
+#menu-button {
+    position: fixed;
+    top: 1em;
+    right: 1rem;
+}

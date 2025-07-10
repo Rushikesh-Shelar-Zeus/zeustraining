@@ -1,0 +1,81 @@
+/* Reset Styles */
+*,
+html,
+body {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    outline: none;
+    overflow: hidden;
+}
+
+/* Body */
+body {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Main Card */
+.card {
+    width: 457px;
+    height: 138px;
+    border: 1px solid black;
+}
+
+.card-content {
+    margin: 4px;
+    display: flex;
+}
+
+
+/* Details */
+.details {
+    margin: 0;
+    margin-left: 14px;
+    margin-top: 5px;
+}
+
+/* Porfile Photo */
+.profile-img {
+    width: 130px;
+    height: 130px;
+    aspect-ratio: 1;
+}
+
+/* Username */
+.username {
+    font: 700 20px 'Roboto', system-ui;
+    color: #000;
+    margin-bottom: 14px;
+}
+
+.caption {
+    font: 400 20px 'Roboto', system-ui;
+    margin-bottom: 24px;
+}
+
+.metrics {
+    display: flex;
+    align-items: flex-start;
+}
+
+.measures {
+    display: flex;
+    align-items: center;
+    margin-right: 24px;
+}
+
+.measures img {
+    width: 20px;
+    height: 20px;
+    aspect-ratio: 1;
+    margin-right: 14px;
+}
+
+.measures p {
+    font: 600 15px 'Roboto', system-ui;
+    color: #858991;
+}
