@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 // Hamburger Functionality
 function handleMobileMenu() {
+    const menuIcon = document.querySelector("#menu-button");
     const header = document.querySelector('header');
     const nav = document.querySelector('nav');
     const items = document.querySelectorAll(".item");
@@ -21,9 +22,17 @@ function handleMobileMenu() {
     if (!items) {
         throw new Error("Incorrect Items or Null");
     }
+    if (!(menuIcon instanceof HTMLElement)) {
+        throw new Error("Incorrect Header Or Null");
+    }
+    menuIcon.classList.toggle('open');
     header.classList.toggle('mobile');
     items.forEach(item => item.classList.toggle('mobile'));
     nav.classList.toggle('mobile');
+}
+const menu = document.getElementById("menu-button");
+if (menu) {
+    menu.addEventListener('click', handleMobileMenu);
 }
 // Active Link
 const links = document.querySelectorAll('.item');
@@ -32,8 +41,31 @@ if (!links) {
 }
 links.forEach(link => {
     link.addEventListener('click', () => {
-        links.forEach(l => l.classList.remove('active'));
+        links.forEach(l => {
+            l.classList.remove('active');
+        });
         link.classList.add('active');
+    });
+});
+const items = document.querySelectorAll('.item');
+if (!items) {
+    throw new Error("Incorrect nav items or Null");
+}
+items.forEach(item => {
+    item.addEventListener('click', () => {
+        // Remove 'active' and 'show' from all items
+        items.forEach(i => {
+            i.classList.remove('active');
+            const dropdown = i.querySelector('.dropdown');
+            if (dropdown)
+                dropdown.classList.remove('show');
+        });
+        // Add 'active' to clicked item
+        item.classList.add('active');
+        // Add 'show' to the dropdown of the clicked item, if it exists
+        const dropdown = item.querySelector('.dropdown');
+        if (dropdown)
+            dropdown.classList.add('show');
     });
 });
 // Active Class or Courses

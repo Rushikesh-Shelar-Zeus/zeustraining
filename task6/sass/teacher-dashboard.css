@@ -90,6 +90,24 @@ nav .item.active::after {
   width: 100%;
   height: 0.25rem;
 }
+nav .item.active.mobile .dropdown.show {
+  display: flex;
+  align-items: center;
+}
+nav .item img {
+  display: none;
+}
+
+.dropdown {
+  display: none;
+  width: 100%;
+  position: relative;
+  top: 100%;
+  left: 0;
+  background-color: #f3f3f3;
+  padding-left: 2rem;
+  z-index: 1000;
+}
 
 /* Notification bar */
 .notification {
@@ -102,6 +120,107 @@ nav .item.active::after {
   gap: 2rem;
   position: relative;
   z-index: 2;
+}
+.notification .announcement {
+  position: relative;
+}
+.notification .announcement-list {
+  position: absolute;
+  top: 2.8rem;
+  right: -15px;
+  background-color: #fff;
+  height: auto;
+  width: 315px;
+  max-height: 582px;
+  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1607843137);
+  overflow-y: scroll;
+}
+.notification .announcement-list .announcement-card {
+  width: 100%;
+  height: auto;
+  padding: 1rem;
+}
+.notification .announcement-list .announcement-card .announcement-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.notification .announcement-list .announcement-card .announcement-content .r1 {
+  display: flex;
+  width: 100%;
+  padding: 0;
+  align-items: center;
+  justify-content: space-between;
+}
+.notification .announcement-list .announcement-card .announcement-content .r1 div {
+  display: flex;
+}
+.notification .announcement-list .announcement-card .announcement-content .r1 div p {
+  text-align: "left";
+  font-weight: 600;
+  font-size: 0.75rem;
+  font-family: "Quicksand", "sans-serif";
+  line-height: 1rem;
+  letter-spacing: 0;
+  color: #6E6E6E;
+  opacity: 1;
+}
+.notification .announcement-list .announcement-card .announcement-content .r1 div p span {
+  text-align: "left";
+  font-weight: 600;
+  font-size: 0.75rem;
+  font-family: "Quicksand", "sans-serif";
+  line-height: 1rem;
+  letter-spacing: 0;
+  color: #222222;
+  opacity: 1;
+}
+.notification .announcement-list .announcement-card .announcement-content .r1 img {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+}
+.notification .announcement-list .announcement-card .announcement-content .r2 {
+  text-align: "left";
+  font-weight: 600;
+  font-size: 0.875rem;
+  font-family: "Quicksand", "sans-serif";
+  line-height: 1.125rem;
+  letter-spacing: 0;
+  color: #222222;
+  opacity: 1;
+}
+.notification .announcement-list .announcement-card .announcement-content .r3 {
+  text-align: "left";
+  font-weight: 600;
+  font-size: 0.75rem;
+  font-family: "Quicksand", "sans-serif";
+  line-height: 1rem;
+  letter-spacing: 0;
+  color: #6E6E6E;
+  opacity: 1;
+}
+.notification .announcement-list .announcement-card .announcement-content .r4 {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-align: "right";
+  font-weight: 600;
+  font-size: 0.75rem;
+  font-family: "Quicksand", "sans-serif";
+  line-height: 1.125rem;
+  letter-spacing: 0;
+  color: #6E6E6E;
+  opacity: 1;
+  gap: 1.75rem;
+}
+.notification .announcement-list .announcement-card .announcement-content .r4 .attachment {
+  display: flex;
+}
+.notification .announcement-list .announcement-card .announcement-content .r4 .timestamp {
+  margin-left: auto;
 }
 
 #menu-button {
@@ -132,8 +251,8 @@ nav .item.active::after {
 
 .announcement-count {
   position: absolute;
-  top: -5px;
-  right: 45px;
+  top: -8px;
+  right: -10px;
   background-color: #2a7ff3;
   border-radius: 50%;
   height: 1rem;
@@ -574,6 +693,11 @@ nav .item.active::after {
 @media screen and (max-width: 800px) {
   nav {
     display: none;
+  }
+  .dropdown {
+    position: absolute;
+    min-width: 100%;
+    min-height: 48px;
   }
   .notification {
     margin-left: auto;

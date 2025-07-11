@@ -1,9 +1,5 @@
-Mobile Nav
-header.mobile {
+Mobile Nav header.mobile {
     flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
-    background-repeat: repeat-x;
     position: relative;
 
 }
@@ -11,28 +7,56 @@ header.mobile {
 nav.mobile {
     display: flex;
     flex-direction: column;
-    background-color: #222;
+    gap: 0;
+    background-color: #fff;
     position: absolute;
-    top: 3.5rem;
-    padding: 1em;
-    width: 100%;
+    top: 3.93rem;
+    right: 1rem;
+    width: 280px;
+    box-shadow: 0px 13px 20px #0000003D;
 }
 
+nav.mobile .item {
+    width: 100%;
+    height: 3rem;
+    padding: 1em;
+}
+
+nav.mobile .item .link {
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+nav.mobile .item img {
+    display: block;
+}
+
+
+
+
+nav.mobile a {
+    color: #1F7A54;
+    font-weight: 600;
+
+}
+
+nav .item.mobile.active a {
+    color: #1F7A54;
+}
+
+\nav .item.mobile.active {
+    background-color: #F3F3F3;
+
+}
 
 nav .item.mobile.active::after {
-  content: "";
-  position: absolute;
-  left: -1rem;
-  top: 0.12rem;
-  background-color: #fff;
-  width: 0.25rem;
-  height: 100%;
+    display: none;
 }
 
 
 
-/* #menu-button {
-    position: fixed;
-    top: 1em;
-    right: 1rem;
-} */
+#menu-button.open {
+    filter: brightness(0) invert(1);
+}
