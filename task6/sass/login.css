@@ -17,6 +17,7 @@ body {
   background-color: #EEEEEE;
   height: 100vh;
   font-family: "Quicksand";
+  font-size: 16px;
 }
 
 /* Container (Spans Whole Body)*/
@@ -56,16 +57,16 @@ header .logo {
   justify-content: center;
   align-items: center;
   flex: 1;
-  margin: 50px 0;
+  margin: 3.125rem 0;
 }
 
 /* Login content */
 .login-content {
   width: 488px;
-  height: 550px;
+  min-height: 550px;
   border: 1px solid rgba(33, 62, 84, 0.2392156863);
   background-color: #FFFFFF;
-  border-top: 4px solid #3AC7EC;
+  border-top: 0.25rem solid #3AC7EC;
   border-radius: 3px;
 }
 
@@ -73,11 +74,11 @@ header .logo {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  margin: 16px 30px;
+  margin: 1rem 1.875rem;
 }
 .heading .info {
   text-align: center;
-  font: normal normal 600 24px/28px "Quicksand";
+  font: normal normal 600 1.5rem/1.75rem "Quicksand";
   letter-spacing: 0;
   color: #222222;
   opacity: 1;
@@ -86,43 +87,43 @@ header .logo {
 
 /* Main Form Sections (input elements) */
 form {
-  margin: 34px 32px;
+  margin: 2.125rem 2rem;
 }
 
 .form-element {
-  margin: 20px 0;
+  margin: 1.5rem 0;
 }
 
 /* Radio Buttons */
 .radio-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 25px;
-  margin: -6px;
+  gap: 1em 1.5rem;
+  margin-left: -6px;
 }
 .radio-group .radio-button {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  gap: 8px;
+  gap: 0.25rem;
 }
 .radio-group .radio-button input[type=radio] {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
   background-image: url("../assets/icons/radio-button-off.svg");
-  width: 24px;
-  height: 24px;
+  width: 1.5rem;
+  height: 1.5rem;
   cursor: pointer;
 }
 .radio-group .radio-button input[type=radio]:checked {
   background-image: url("../assets/icons/radio-button-on.svg");
-  width: 24px;
-  height: 24px;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 .radio-group label {
   text-align: left;
-  font: normal normal 600 16px/20px "Quicksand";
+  font: normal normal 600 1rem/1.25rem "Quicksand";
   letter-spacing: 0;
   color: #333333;
   opacity: 1;
@@ -133,15 +134,18 @@ form {
 .select {
   display: flex;
   flex-direction: column;
-  height: 45px;
+  height: 2.81rem;
+}
+.select.state {
+  margin-bottom: 2.25rem;
 }
 .select label {
   text-align: left;
-  font: normal normal 600 12px/16px "Quicksand";
+  font: normal normal 600 0.75rem/1rem "Quicksand";
   letter-spacing: 0;
   color: #666666;
   opacity: 1;
-  margin-bottom: 5px;
+  margin-bottom: 0.28rem;
 }
 .select select {
   -webkit-appearance: none;
@@ -155,7 +159,7 @@ form {
   border: none;
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
   text-align: left;
-  font: normal normal 600 16px/20px "Quicksand";
+  font: normal normal 600 1rem/1.25rem "Quicksand";
   letter-spacing: 0;
   color: #222222;
   opacity: 1;
@@ -165,12 +169,13 @@ form {
 
 /* Username and Password Inputs */
 .username {
-  margin: 54px 0 30px 0;
+  margin: 3.5rem 0 2.125rem 0;
 }
 
 .form-element .text-input {
   width: 100%;
   border: none;
+  padding-bottom: 0.3rem;
   border-bottom: 1px solid #e0e0e0;
   outline: none;
   opacity: 1;
@@ -179,18 +184,22 @@ form {
   outline: none;
   font-size: 1rem;
   border: none;
+  width: 100%;
 }
 .form-element .text-input input::-moz-placeholder {
-  font: normal normal 600 16px/20px "Quicksand";
+  font: normal normal 600 1rem/1.25rem "Quicksand";
   letter-spacing: 0px;
   opacity: 1;
   color: #666666;
 }
 .form-element .text-input input::placeholder {
-  font: normal normal 600 16px/20px "Quicksand";
+  font: normal normal 600 1rem/1.25rem "Quicksand";
   letter-spacing: 0px;
   opacity: 1;
   color: #666666;
+}
+.form-element.password {
+  margin-bottom: 1.63rem;
 }
 
 .password-box {
@@ -211,7 +220,7 @@ form {
   padding-top: 3px;
   text-transform: uppercase;
   text-align: right;
-  font: normal normal 800 14px/18px "Quicksand";
+  font: normal normal 800 0.875rem/1.125rem "Quicksand";
   letter-spacing: 0;
   color: #1F7A54;
   opacity: 1;
@@ -220,12 +229,12 @@ form {
 .remember-me {
   display: flex;
   align-items: center;
-  margin: -6px;
-  margin-bottom: 32px;
+  margin-left: -6px;
+  margin-bottom: 2.125rem;
 }
 .remember-me label {
   text-align: left;
-  font: normal normal 600 16px/20px "Quicksand";
+  font: normal normal 600 1rem/1.25rem "Quicksand";
   letter-spacing: 0;
   color: #222222;
   opacity: 1;
@@ -236,20 +245,23 @@ form {
      -moz-appearance: none;
           appearance: none;
   background-image: url("../assets/icons/checkbox-unchecked.svg");
-  width: 22px;
-  height: 22px;
+  width: 1.375rem;
+  height: 1.375rem;
   cursor: pointer;
 }
 .remember-me input[type=checkbox]:checked {
   background-image: url("../assets/icons/checkbox-checked.svg");
-  width: 22px;
-  height: 22px;
+  width: 1.375rem;
+  height: 1.375rem;
 }
 
 .button-container {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  min-height: 78px;
+  margin-bottom: 0;
 }
 
 .login-button {
@@ -257,13 +269,14 @@ form {
   background: #3FD28B 0% 0% no-repeat padding-box;
   opacity: 1;
   border-radius: 3px;
-  height: 40px;
+  margin-bottom: 1.5rem;
+  height: 2.5rem;
   width: 215.51px;
   text-transform: uppercase;
   border: none;
   box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2392156863);
   text-align: center;
-  font: normal normal 600 14px/18px "Quicksand";
+  font: normal normal 600 0.875rem/1.125rem "Quicksand";
   letter-spacing: 0;
   color: #1F2834;
   opacity: 1;
@@ -273,12 +286,12 @@ form {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
+  gap: 0.675rem;
+  margin-bottom: 1rem;
 }
 .information .about a {
   text-align: center;
-  font: normal normal 600 14px/18px "Quicksand";
+  font: normal normal 600 0.875rem/1.125rem "Quicksand";
   letter-spacing: 0;
   color: #1F7A54;
   opacity: 1;
@@ -286,7 +299,7 @@ form {
 }
 .information .contact a {
   text-align: center;
-  font: normal normal 600 14px/18px "Quicksand";
+  font: normal normal 600 0.875rem/1.125rem "Quicksand";
   letter-spacing: 0;
   color: #1F7A54;
   opacity: 1;
@@ -300,7 +313,7 @@ form {
 }
 
 .line-f {
-  height: 24px;
+  height: 1.5rem;
   border: 1px solid rgba(0, 0, 0, 0.1215686275);
   opacity: 1;
 }
@@ -329,7 +342,7 @@ form {
 
 .copyright {
   text-align: left;
-  font: normal normal 600 12px/16px "Quicksand";
+  font: normal normal 600 0.75rem/1rem "Quicksand";
   letter-spacing: 0;
   color: #616161;
   opacity: 1;
@@ -337,7 +350,7 @@ form {
 
 .zeus-info {
   text-align: left;
-  font: normal normal 600 12px/16px "Quicksand";
+  font: normal normal 700 0.75rem/1rem "Quicksand";
   letter-spacing: 0;
   color: #616161;
   opacity: 1;
@@ -346,7 +359,7 @@ form {
 
 .rights {
   text-align: left;
-  font: normal normal 600 12px/16px "Quicksand";
+  font: normal normal 600 0.75rem/1rem "Quicksand";
   letter-spacing: 0;
   color: #616161;
   opacity: 1;

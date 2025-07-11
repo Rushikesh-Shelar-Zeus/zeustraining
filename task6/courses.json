@@ -28,13 +28,19 @@
             "lessons": 15,
             "chapters": 20
         },
+        "footerIcons": {
+            "eye": "enable",
+            "submission": "disabled",
+            "schedule": "disabled",
+            "chart": "enable"
+        },
         "className": "No Classes",
         "isSelectDisabled": true,
         "isGray": false
     },
     {
         "imgSrc": "assets/images/imageMask-2.png",
-        "topic": "Introduction to Biology: Micro organisms and how they affec...",
+        "topic": "Introduction to Biology: Micro organisms and how they affect the other Life Systems in Enviornment.",
         "subject": "Biology",
         "grade": "Grade 4",
         "point": "+1",
@@ -42,6 +48,12 @@
             "units": 5,
             "lessons": 16,
             "chapters": 22
+        },
+        "footerIcons": {
+            "eye": "enable",
+            "submission": "disabled",
+            "schedule": "disabled",
+            "chart": "enable"
         },
         "className": "All Classes",
         "info": {
