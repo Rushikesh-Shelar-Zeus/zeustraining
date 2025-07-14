@@ -106,11 +106,12 @@ nav {
                 .dropdown.show {
                     display: flex;
                     align-items: center;
+                    margin-top: 1rem;
                 }
             }
         }
 
-        img {
+        svg {
             display: none;
         }
     }
@@ -119,11 +120,11 @@ nav {
 .dropdown {
     display: none;
     width: 100%;
-    position: relative;
     top: 100%;
     left: 0;
     background-color: #f3f3f3;
-    padding-left: 2rem;
+    padding-left: 1rem;
+
     z-index: 1000;
 }
 
@@ -146,8 +147,18 @@ nav {
         align-items: center;
         height: 100%;
 
+        img {
+            &.open {
+                filter: brightness(0) invert(1);
+            }
+        }
+
         .alert-count {
             @include notification(10px, -4px, #2a7ff3, #ffffff);
+
+            &.open {
+                display: none;
+            }
         }
 
     }
@@ -272,8 +283,19 @@ nav {
         align-items: center;
         height: 100%;
 
+
+        img {
+            &.open {
+                filter: brightness(0) invert(1);
+            }
+        }
+
         .announcement-count {
             @include notification(10px, -8px, #2a7ff3, #ffffff);
+
+            &.open {
+                display: none;
+            }
         }
     }
 
@@ -841,8 +863,7 @@ nav {
     }
 
     .dropdown {
-        position: absolute;
-        min-width: 100%;
+        width: 100%;
         min-height: 48px;
     }
 

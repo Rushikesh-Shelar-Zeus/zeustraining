@@ -75,28 +75,49 @@ items.forEach(item => {
 
 
 // Notifications
-const alertIcon: HTMLElement = document.getElementById('alert');
-const alertPreview : HTMLElement = document.getElementById("alert-preview");
+const alertIcon: HTMLElement = document.getElementById('alert') as HTMLElement;
+const alertPreview: HTMLElement = document.getElementById("alert-preview") as HTMLElement;
 
-const announcementIcon: HTMLElement = document.getElementById('announcement');
-const announcementPreview: HTMLElement = document.getElementById('announcement-preview');
+const announcementIcon: HTMLElement = document.getElementById('announcement') as HTMLElement;
+const announcementPreview: HTMLElement = document.getElementById('announcement-preview') as HTMLElement;
 
-function showPreview(previewElement: HTMLElement){
-    previewElement.classList.add("show");
+const alertCount: HTMLElement = document.querySelector(".alert-count") as HTMLElement;
+const announcementCount: HTMLElement = document.querySelector(".announcement-count") as HTMLElement;
+
+const alertImg = document.getElementById("alert-img") as HTMLElement;
+const announceImg = document.getElementById("announce-img") as HTMLElement;
+console.log(alertImg, announceImg)
+
+function invertAndHide(element: HTMLElement) {
+    element.classList.remove('open');
 }
 
-function hideAll(){
+function showPreview(previewElement: HTMLElement) {
+    previewElement.classList.add("show");
+    previewElement.classList.add("open");
+}
+
+function hideAll() {
+    
     alertPreview.classList.remove("show");
     announcementPreview.classList.remove("show");
+    invertAndHide(alertCount);
+    invertAndHide(announcementCount);
+    invertAndHide(alertImg);
+    invertAndHide(announceImg);
 }
 
 // Show the Previews
 alertIcon.addEventListener("mouseenter", () => {
     showPreview(alertPreview);
+    alertCount.classList.add('open');
+    alertImg.classList.add("open");
 });
 
 announcementIcon.addEventListener("mouseenter", () => {
     showPreview(announcementPreview);
+    announcementCount.classList.add('open');
+    announceImg.classList.add("open");
 });
 
 // Hide on mouse Leave

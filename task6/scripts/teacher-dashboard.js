@@ -101,19 +101,36 @@ var alertIcon = document.getElementById('alert');
 var alertPreview = document.getElementById("alert-preview");
 var announcementIcon = document.getElementById('announcement');
 var announcementPreview = document.getElementById('announcement-preview');
+var alertCount = document.querySelector(".alert-count");
+var announcementCount = document.querySelector(".announcement-count");
+var alertImg = document.getElementById("alert-img");
+var announceImg = document.getElementById("announce-img");
+console.log(alertImg, announceImg);
+function invertAndHide(element) {
+    element.classList.remove('open');
+}
 function showPreview(previewElement) {
     previewElement.classList.add("show");
+    previewElement.classList.add("open");
 }
 function hideAll() {
     alertPreview.classList.remove("show");
     announcementPreview.classList.remove("show");
+    invertAndHide(alertCount);
+    invertAndHide(announcementCount);
+    invertAndHide(alertImg);
+    invertAndHide(announceImg);
 }
 // Show the Previews
 alertIcon.addEventListener("mouseenter", function () {
     showPreview(alertPreview);
+    alertCount.classList.add('open');
+    alertImg.classList.add("open");
 });
 announcementIcon.addEventListener("mouseenter", function () {
     showPreview(announcementPreview);
+    announcementCount.classList.add('open');
+    announceImg.classList.add("open");
 });
 // Hide on mouse Leave
 alertIcon.addEventListener("mouseleave", function () {

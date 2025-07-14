@@ -1,6 +1,5 @@
 Mobile Nav header.mobile {
     flex-direction: column;
-    position: relative;
 
 }
 
@@ -10,15 +9,16 @@ nav.mobile {
     gap: 0;
     background-color: #fff;
     position: absolute;
-    top: 3.93rem;
+    top: 3.5rem;
     right: 1rem;
     width: 280px;
+    height: auto;
     box-shadow: 0px 13px 20px #0000003D;
 }
 
 nav.mobile .item {
     width: 100%;
-    height: 3rem;
+    min-height: 3rem;
     padding: 1em;
 }
 
@@ -33,9 +33,6 @@ nav.mobile .item img {
     display: block;
 }
 
-
-
-
 nav.mobile a {
     color: #1F7A54;
     font-weight: 600;
@@ -46,8 +43,9 @@ nav .item.mobile.active a {
     color: #1F7A54;
 }
 
-\nav .item.mobile.active {
+nav .item.mobile.active {
     background-color: #F3F3F3;
+    padding-bottom: 0;
 
 }
 
