@@ -34,7 +34,7 @@ header {
   align-items: center;
   flex-wrap: nowrap;
   flex-direction: row;
-  min-height: 3.5rem;
+  height: 3.5rem;
   padding-right: 1.5rem;
 }
 header::before {
@@ -58,6 +58,7 @@ nav {
   display: flex;
   align-items: center;
   position: relative;
+  height: 100%;
   margin-left: auto;
   gap: 2rem;
   z-index: 10;
@@ -85,7 +86,7 @@ nav .item.active::after {
   content: "";
   position: absolute;
   left: 0;
-  bottom: -22px;
+  bottom: -18px;
   background-color: #fff;
   width: 100%;
   height: 0.25rem;
@@ -114,23 +115,35 @@ nav .item img {
   margin-left: 2rem;
   height: 100%;
   display: flex;
-  justify-content: flex-start;
   align-items: center;
-  flex-wrap: nowrap;
-  flex-direction: row;
   gap: 2rem;
-  position: relative;
   z-index: 2;
 }
 .notification .alert {
   position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   height: 100%;
+}
+.notification .alert .alert-count {
+  position: absolute;
+  top: 10px;
+  right: -4px;
+  background-color: #2a7ff3;
+  border-radius: 50%;
+  height: 1rem;
+  width: 1rem;
+  font-size: 0.75rem;
+  text-align: center;
+  color: #ffffff;
 }
 .notification .alert-list {
   opacity: 0;
   transform: translateY(-10px);
   position: absolute;
-  top: 2.9rem;
+  top: 3.5rem;
   right: -15px;
   height: auto;
   width: 315px;
@@ -253,12 +266,29 @@ nav .item img {
 }
 .notification .announcement {
   position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+.notification .announcement .announcement-count {
+  position: absolute;
+  top: 10px;
+  right: -8px;
+  background-color: #2a7ff3;
+  border-radius: 50%;
+  height: 1rem;
+  width: 1rem;
+  font-size: 0.75rem;
+  text-align: center;
+  color: #ffffff;
 }
 .notification .announcement-list {
   opacity: 0;
   transform: translateY(-10px);
   position: absolute;
-  top: 2.8rem;
+  top: 3.5rem;
   right: -15px;
   height: auto;
   width: 315px;
@@ -413,6 +443,31 @@ nav .item img {
   background: rgba(0, 0, 0, 0.38);
   border-radius: 6px;
 }
+.notification .profile {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+.notification .profile img {
+  width: 32px;
+  height: 32px;
+}
+.notification .profile .profile-count {
+  position: absolute;
+  top: 8px;
+  right: -2px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  height: 1rem;
+  width: 1rem;
+  font-size: 0.75rem;
+  text-align: center;
+  color: #000000;
+  font-size: 0.67rem;
+}
 
 #menu-button {
   all: unset;
@@ -424,46 +479,6 @@ nav .item img {
   background: transparent;
   cursor: pointer;
   z-index: 15;
-}
-
-.alert-count {
-  position: absolute;
-  top: -5px;
-  left: 12px;
-  right: 0;
-  background-color: #2a7ff3;
-  border-radius: 50%;
-  height: 1rem;
-  width: 1rem;
-  font-size: 0.75rem;
-  text-align: center;
-  color: #ffffff;
-}
-
-.announcement-count {
-  position: absolute;
-  top: -8px;
-  right: -10px;
-  background-color: #2a7ff3;
-  border-radius: 50%;
-  height: 1rem;
-  width: 1rem;
-  font-size: 0.75rem;
-  text-align: center;
-  color: #ffffff;
-}
-
-.profile-count {
-  position: absolute;
-  top: -5px;
-  right: -2px;
-  background-color: #ffffff;
-  border-radius: 50%;
-  height: 1rem;
-  width: 1rem;
-  font-size: 0.75rem;
-  text-align: center;
-  color: #000000;
 }
 
 /* Dashboard Content */

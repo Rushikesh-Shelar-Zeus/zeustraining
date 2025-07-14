@@ -10,11 +10,11 @@
     flex-direction: $direction;
 }
 
-@mixin notification($top, $right, $bgColor, $color, $left: 0) {
+@mixin notification($top, $right, $bgColor, $color, $left: null) {
     position: absolute;
     top: $top;
 
-    @if $left ==12px {
+    @if $left !=null {
         left: $left;
     }
 
@@ -46,7 +46,7 @@ header {
     background-color: #000;
     position: relative;
     @include flex(space-between, center);
-    min-height: 3.5rem;
+    height: 3.5rem;
     padding-right: 1.5rem;
 
     &::before {
@@ -72,6 +72,7 @@ nav {
     display: flex;
     align-items: center;
     position: relative;
+    height: 100%;
     margin-left: auto;
     gap: 2rem;
     z-index: 10;
@@ -95,7 +96,7 @@ nav {
                 content: "";
                 position: absolute;
                 left: 0;
-                bottom: -22px;
+                bottom: -18px;
                 background-color: #fff;
                 width: 100%;
                 height: 0.25rem;
@@ -132,21 +133,30 @@ nav {
 .notification {
     margin-left: 2rem;
     height: 100%;
-    @include flex(flex-start, center);
+    display: flex;
+    align-items: center;
     gap: 2rem;
-    position: relative;
     z-index: 2;
 
     .alert {
         position: relative;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         height: 100%;
+
+        .alert-count {
+            @include notification(10px, -4px, #2a7ff3, #ffffff);
+        }
+
     }
 
     .alert-list {
         opacity: 0;
         transform: translateY(-10px);
         position: absolute;
-        top: 2.9rem;
+        top: 3.5rem;
         right: -15px;
         height: auto;
         width: 315px;
@@ -256,13 +266,22 @@ nav {
 
     .announcement {
         position: relative;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+
+        .announcement-count {
+            @include notification(10px, -8px, #2a7ff3, #ffffff);
+        }
     }
 
     .announcement-list {
         opacity: 0;
         transform: translateY(-10px);
         position: absolute;
-        top: 2.8rem;
+        top: 3.5rem;
         right: -15px;
         height: auto;
         width: 315px;
@@ -399,6 +418,25 @@ nav {
 
         }
     }
+
+    .profile {
+        position: relative;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+
+        img {
+            width: 32px;
+            height: 32px
+        }
+
+        .profile-count {
+            @include notification(8px, -2px, #ffffff, #000000);
+            font-size: 0.67rem;
+        }
+    }
 }
 
 
@@ -415,17 +453,7 @@ nav {
     }
 }
 
-.alert-count {
-    @include notification(-5px, 0, #2a7ff3, #ffffff, 12px);
-}
 
-.announcement-count {
-    @include notification(-8px, -10px, #2a7ff3, #ffffff);
-}
-
-.profile-count {
-    @include notification(-5px, -2px, #ffffff, #000000, 8px);
-}
 
 /* Dashboard Content */
 .dashboard {
