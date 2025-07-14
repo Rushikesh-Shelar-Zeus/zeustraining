@@ -131,30 +131,165 @@ nav {
 /* Notification bar */
 .notification {
     margin-left: 2rem;
+    height: 100%;
     @include flex(flex-start, center);
     gap: 2rem;
     position: relative;
     z-index: 2;
+
+    .alert {
+        position: relative;
+        height: 100%;
+    }
+
+    .alert-list {
+        opacity: 0;
+        transform: translateY(-10px);
+        position: absolute;
+        top: 2.9rem;
+        right: -15px;
+        height: auto;
+        width: 315px;
+        max-height: 582px;
+        box-shadow: 0px 3px 6px #00000029;
+        overflow-y: scroll;
+        pointer-events: none;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        z-index: 999;
+
+        &.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .alert-card {
+            width: 100%;
+            height: auto;
+            padding: 1rem;
+            background-color: #fff;
+            border-bottom: 1px solid #2222221F;
+
+
+            &.yellow {
+                background-color: #FFFFEE;
+            }
+
+            .alert-content {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+
+                .r1 {
+                    display: flex;
+                    width: 100%;
+                    padding: 0;
+                    align-items: center;
+
+                    div {
+                        p {
+                            @include font('left', 600, 0.875rem, 1.125rem, 0, #222222);
+                        }
+                    }
+
+                    svg {
+                        flex: 0 0 auto;
+                        margin-left: auto;
+                        width: 20px;
+                        height: 20px;
+                    }
+                }
+
+                .r2 {
+                    @include font('left', 600, 0.75rem, 1rem, 0, #6E6E6E);
+
+                    span {
+                        @include font('left', 600, 0.75rem, 1rem, 0, #222222);
+                    }
+                }
+
+                .r3 {
+                    .timestamp {
+                        @include font('left', 600, 0.75rem, 0.875rem, 0, #6E6E6E);
+                        width: fit-content;
+                        margin-left: auto;
+                    }
+                }
+            }
+        }
+
+        .btn-box {
+            width: 100%;
+            height: 3rem;
+            background-color: #fff;
+            position: sticky;
+            bottom: 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0px 1px 6px #0000003D;
+            border-radius: 0px 0px 2px 2px;
+
+            p {
+                text-transform: uppercase;
+                @include font($textAlign: center, $fontWeight: 600, $fontSize: 0.875rem, $lineHeight: 1.125rem, $color: #1F7A54);
+            }
+
+        }
+
+        &::-webkit-scrollbar {
+            width: 0.25rem;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: #FFF;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.38);
+            border-radius: 6px;
+
+        }
+    }
 
     .announcement {
         position: relative;
     }
 
     .announcement-list {
+        opacity: 0;
+        transform: translateY(-10px);
         position: absolute;
         top: 2.8rem;
         right: -15px;
-        background-color: #fff;
         height: auto;
         width: 315px;
         max-height: 582px;
         box-shadow: 0px 3px 6px #00000029;
         overflow-y: scroll;
+        pointer-events: none;
+        transition: opacity 0.5s ease, transform 0.5s ease;
+        z-index: 999;
+
+        &.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
 
         .announcement-card {
             width: 100%;
             height: auto;
             padding: 1rem;
+            background-color: #fff;
+            border-bottom: 1px solid #2222221F;
+
+
+            &.yellow {
+                background-color: #FFFFEE;
+            }
 
             .announcement-content {
                 width: 100%;
@@ -182,19 +317,13 @@ nav {
                             }
                         }
                     }
-
-                    img {
-                        width: 1rem;
-                        height: 1rem;
-                        border-radius: 50%;
-                    }
                 }
 
                 .r2 {
                     @include font('left', 600, 0.875rem, 1.125rem, 0, #222222);
                 }
 
-                .r3{
+                .r3 {
                     @include font('left', 600, 0.75rem, 1rem, 0, #6E6E6E)
                 }
 
@@ -203,17 +332,71 @@ nav {
                     align-items: center;
                     width: 100%;
                     @include font('right', 600, 0.75rem, 1.125rem, 0, #6E6E6E);
-                    gap: 1.75rem;
+                    padding: 0;
 
                     .attachment {
                         display: flex;
+                        width: 50%;
+                        margin-left: -4px;
+
+                        img {
+                            width: 16px;
+                            height: 16px;
+                        }
                     }
 
-                    .timestamp{
+                    .timestamp {
+                        width: fit-content;
                         margin-left: auto;
                     }
                 }
             }
+        }
+
+        .btn-box {
+            width: 100%;
+            height: 3rem;
+            background-color: #fff;
+            position: sticky;
+            bottom: 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0px 1px 6px #0000003D;
+            border-radius: 0px 0px 2px 2px;
+
+            .show-all {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 6px 0;
+                border-right: 1px solid #0000001F;
+            }
+
+            .create-new {
+                flex: 1;
+            }
+
+            p {
+                text-transform: uppercase;
+                @include font($textAlign: center, $fontWeight: 600, $fontSize: 0.875rem, $lineHeight: 1.125rem, $color: #1F7A54);
+            }
+
+        }
+
+        &::-webkit-scrollbar {
+            width: 0.25rem;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: #FFF;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.38);
+            border-radius: 6px;
+
         }
     }
 }

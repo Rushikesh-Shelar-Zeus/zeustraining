@@ -74,6 +74,43 @@ items.forEach(item => {
 
 
 
+// Notifications
+const alertIcon: HTMLElement = document.getElementById('alert');
+const alertPreview : HTMLElement = document.getElementById("alert-preview");
+
+const announcementIcon: HTMLElement = document.getElementById('announcement');
+const announcementPreview: HTMLElement = document.getElementById('announcement-preview');
+
+function showPreview(previewElement: HTMLElement){
+    previewElement.classList.add("show");
+}
+
+function hideAll(){
+    alertPreview.classList.remove("show");
+    announcementPreview.classList.remove("show");
+}
+
+// Show the Previews
+alertIcon.addEventListener("mouseenter", () => {
+    showPreview(alertPreview);
+});
+
+announcementIcon.addEventListener("mouseenter", () => {
+    showPreview(announcementPreview);
+});
+
+// Hide on mouse Leave
+alertIcon.addEventListener("mouseleave", () => {
+    setTimeout(() => hideAll(), 200);
+});
+
+announcementIcon.addEventListener("mouseleave", () => {
+    setTimeout(() => hideAll(), 200);
+})
+
+
+
+
 
 
 
