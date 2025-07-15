@@ -139,11 +139,11 @@ announcementIcon.addEventListener("mouseenter", () => {
 
 // Hide on mouse Leave
 alertIcon.addEventListener("mouseleave", () => {
-    setTimeout(() => hideAll(), 200);
+    hideAll();
 });
 
 announcementIcon.addEventListener("mouseleave", () => {
-    setTimeout(() => hideAll(), 200);
+    hideAll();
 })
 
 

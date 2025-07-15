@@ -151,10 +151,10 @@ announcementIcon.addEventListener("mouseenter", function () {
 });
 // Hide on mouse Leave
 alertIcon.addEventListener("mouseleave", function () {
-    setTimeout(function () { return hideAll(); }, 200);
+    hideAll();
 });
 announcementIcon.addEventListener("mouseleave", function () {
-    setTimeout(function () { return hideAll(); }, 200);
+    hideAll();
 });
 // Active Class or Courses
 var headItem = document.querySelectorAll(".head-item ");
