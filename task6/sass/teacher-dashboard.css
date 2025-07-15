@@ -795,6 +795,9 @@ nav .item svg {
   padding-bottom: 0.25rem;
   margin-bottom: 0.5rem;
 }
+.class-select .disabled {
+  opacity: 0.4;
+}
 
 .class-info {
   display: flex;
@@ -938,5 +941,13 @@ nav .item svg {
   }
   .notification {
     display: none;
+  }
+}
+@media screen and (max-width: 500px) {
+  .notification .alert-list {
+    right: auto;
+  }
+  .notification .announcement-list {
+    right: auto;
   }
 }/*# sourceMappingURL=teacher-dashboard.css.map */

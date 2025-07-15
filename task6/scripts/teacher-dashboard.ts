@@ -34,19 +34,19 @@ if (menu) {
 }
 
 // Active Link
-const links: NodeListOf<HTMLElement> = document.querySelectorAll('.item');
-if (!links) {
-    throw new Error("Incorrect nav links or Null");
-}
+// const links: NodeListOf<HTMLElement> = document.querySelectorAll('.item');
+// if (!links) {
+//     throw new Error("Incorrect nav links or Null");
+// }
 
-links.forEach(link => {
-    link.addEventListener('click', () => {
-        links.forEach(l => {
-            l.classList.remove('active');
-        });
-        link.classList.add('active');
-    });
-});
+// links.forEach(link => {
+//     link.addEventListener('click', () => {
+//         links.forEach(l => {
+//             l.classList.remove('active');
+//         });
+//         link.classList.add('active');
+//     });
+// });
 
 const items: NodeListOf<HTMLElement> = document.querySelectorAll('.item');
 
@@ -64,11 +64,11 @@ items.forEach(item => {
         });
 
         // Add 'active' to clicked item
-        item.classList.add('active');
+        item.classList.remove('active');
 
         // Add 'show' to the dropdown of the clicked item, if it exists
         const dropdown = item.querySelector('.dropdown');
-        if (dropdown) dropdown.classList.add('show');
+        if (dropdown) dropdown.classList.toggle('show');
     });
 });
 
@@ -86,7 +86,6 @@ const announcementCount: HTMLElement = document.querySelector(".announcement-cou
 
 const alertImg = document.getElementById("alert-img") as HTMLElement;
 const announceImg = document.getElementById("announce-img") as HTMLElement;
-console.log(alertImg, announceImg)
 
 function invertAndHide(element: HTMLElement) {
     element.classList.remove('open');
@@ -286,7 +285,6 @@ const dynamicLoad = async (): Promise<void> => {
             info,
             isSelectDisabled,
             isGray } = card;
-        console.log(classData);
         let cardImg = createElement("div", "card-img");
         cardImg.innerHTML = `<img src="${imgSrc}" alt="Image 1">`
 
@@ -329,7 +327,7 @@ const dynamicLoad = async (): Promise<void> => {
 
         let classSelect = createElement("div", "class-select");
         classSelect.innerHTML = `
-            <select name="class-name" id="teacher" ${isSelectDisabled ? "disabled" : ""}>
+            <select name="class-name" id="teacher" ${isSelectDisabled ? "disabled" : ""} class=${isSelectDisabled ? "disabled" : ""}>
                     <option value="1">${className}</option>
             </select>
         `;

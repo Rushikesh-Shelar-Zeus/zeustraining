@@ -22,6 +22,10 @@ nav.mobile .item {
     padding: 1em;
 }
 
+nav.mobile .item svg {
+    display: block;
+}
+
 nav.mobile .item .link {
     height: 100%;
     display: flex;

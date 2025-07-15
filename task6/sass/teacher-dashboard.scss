@@ -741,6 +741,10 @@ nav {
         padding-bottom: 0.25rem;
         margin-bottom: 0.5rem;
     }
+
+    .disabled {
+        opacity: 0.4;
+    }
 }
 
 .class-info {
@@ -895,5 +899,17 @@ nav {
 
     .notification {
         display: none;
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .notification {
+
+        .alert-list{
+            right: auto;
+        }
+        .announcement-list {
+            right: auto;
+        }
     }
 }

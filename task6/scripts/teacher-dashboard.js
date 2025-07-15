@@ -63,18 +63,18 @@ if (menu) {
     menu.addEventListener('click', handleMobileMenu);
 }
 // Active Link
-var links = document.querySelectorAll('.item');
-if (!links) {
-    throw new Error("Incorrect nav links or Null");
-}
-links.forEach(function (link) {
-    link.addEventListener('click', function () {
-        links.forEach(function (l) {
-            l.classList.remove('active');
-        });
-        link.classList.add('active');
-    });
-});
+// const links: NodeListOf<HTMLElement> = document.querySelectorAll('.item');
+// if (!links) {
+//     throw new Error("Incorrect nav links or Null");
+// }
+// links.forEach(link => {
+//     link.addEventListener('click', () => {
+//         links.forEach(l => {
+//             l.classList.remove('active');
+//         });
+//         link.classList.add('active');
+//     });
+// });
 var items = document.querySelectorAll('.item');
 if (!items) {
     throw new Error("Incorrect nav items or Null");
@@ -89,11 +89,11 @@ items.forEach(function (item) {
                 dropdown.classList.remove('show');
         });
         // Add 'active' to clicked item
-        item.classList.add('active');
+        item.classList.toggle('active');
         // Add 'show' to the dropdown of the clicked item, if it exists
         var dropdown = item.querySelector('.dropdown');
         if (dropdown)
-            dropdown.classList.add('show');
+            dropdown.classList.toggle('show');
     });
 });
 // Notifications
@@ -105,7 +105,6 @@ var alertCount = document.querySelector(".alert-count");
 var announcementCount = document.querySelector(".announcement-count");
 var alertImg = document.getElementById("alert-img");
 var announceImg = document.getElementById("announce-img");
-console.log(alertImg, announceImg);
 function invertAndHide(element) {
     element.classList.remove('open');
 }
@@ -245,7 +244,6 @@ var dynamicLoad = function () { return __awaiter(_this, void 0, void 0, function
                 for (_i = 0, classData_1 = classData; _i < classData_1.length; _i++) {
                     card = classData_1[_i];
                     imgSrc = card.imgSrc, topic = card.topic, subject = card.subject, grade = card.grade, point = card.point, stats = card.stats, footerIcons = card.footerIcons, className = card.className, info = card.info, isSelectDisabled = card.isSelectDisabled, isGray = card.isGray;
-                    console.log(classData);
                     cardImg = createElement("div", "card-img");
                     cardImg.innerHTML = "<img src=\"".concat(imgSrc, "\" alt=\"Image 1\">");
                     cardDetails = createElement('div', "card-details");
@@ -268,7 +266,7 @@ var dynamicLoad = function () { return __awaiter(_this, void 0, void 0, function
                         cardDetails.appendChild(classStats);
                     }
                     classSelect = createElement("div", "class-select");
-                    classSelect.innerHTML = "\n            <select name=\"class-name\" id=\"teacher\" ".concat(isSelectDisabled ? "disabled" : "", ">\n                    <option value=\"1\">").concat(className, "</option>\n            </select>\n        ");
+                    classSelect.innerHTML = "\n            <select name=\"class-name\" id=\"teacher\" ".concat(isSelectDisabled ? "disabled" : "", " class=").concat(isSelectDisabled ? "disabled" : "", ">\n                    <option value=\"1\">").concat(className, "</option>\n            </select>\n        ");
                     cardDetails.appendChild(classSelect);
                     if (info) {
                         classInfo = createElement("div", "class-info");
