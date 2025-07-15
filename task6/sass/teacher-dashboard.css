@@ -948,6 +948,6 @@ nav .item svg {
     right: auto;
   }
   .notification .announcement-list {
-    right: auto;
+    right: -5rem;
   }
 }/*# sourceMappingURL=teacher-dashboard.css.map */

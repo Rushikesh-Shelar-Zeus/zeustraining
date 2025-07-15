@@ -80,20 +80,38 @@ if (!items) {
     throw new Error("Incorrect nav items or Null");
 }
 items.forEach(function (item) {
-    item.addEventListener('click', function () {
-        // Remove 'active' and 'show' from all items
-        items.forEach(function (i) {
-            i.classList.remove('active');
-            var dropdown = i.querySelector('.dropdown');
-            if (dropdown)
-                dropdown.classList.remove('show');
-        });
-        // Add 'active' to clicked item
-        item.classList.toggle('active');
-        // Add 'show' to the dropdown of the clicked item, if it exists
+    var link = item.querySelector('.link');
+    link.addEventListener('click', function (e) {
+        e.preventDefault();
         var dropdown = item.querySelector('.dropdown');
-        if (dropdown)
-            dropdown.classList.toggle('show');
+        var arrow = item.querySelector('.arrow-dropdown');
+        var isOpen = dropdown && dropdown.classList.contains('show');
+        // Close all dropdowns except the clicked one
+        items.forEach(function (i) {
+            var itemDropDown = i.querySelector('.dropdown');
+            var itemArrow = i.querySelector(".arrow-dropdown");
+            if (i !== item) {
+                i.classList.remove('active');
+                if (itemDropDown)
+                    itemDropDown.classList.remove('show');
+                if (itemArrow)
+                    itemArrow.classList.remove("rotated");
+            }
+        });
+        item.classList.add('active');
+        // Toggle the clicked dropdown
+        if (dropdown) {
+            if (isOpen) {
+                dropdown.classList.remove('show');
+                if (arrow)
+                    arrow.classList.remove('rotated');
+            }
+            else {
+                dropdown.classList.add('show');
+                if (arrow)
+                    arrow.classList.add('rotated');
+            }
+        }
     });
 });
 // Notifications
@@ -270,7 +288,7 @@ var dynamicLoad = function () { return __awaiter(_this, void 0, void 0, function
                     cardDetails.appendChild(classSelect);
                     if (info) {
                         classInfo = createElement("div", "class-info");
-                        classInfo.innerHTML = "\n            <span class=\"students\">".concat(info === null || info === void 0 ? void 0 : info.noOfStudents, "</span>\n            <span class=\"vr\"></span>\n            <span class=\"dates\">").concat(info === null || info === void 0 ? void 0 : info.dates, "</span>\n            ");
+                        classInfo.innerHTML = "\n            <span class=\"students\">".concat(info === null || info === void 0 ? void 0 : info.noOfStudents, "</span>\n            ").concat((info === null || info === void 0 ? void 0 : info.dates) ? "<span class=\"vr\"></span>" : "", "\n            <span class=\"dates\">").concat(info === null || info === void 0 ? void 0 : info.dates, "</span>\n            ");
                         cardDetails.appendChild(classInfo);
                     }
                     cardFooter = document.createElement("div");

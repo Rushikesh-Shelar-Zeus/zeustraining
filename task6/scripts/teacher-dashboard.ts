@@ -55,20 +55,38 @@ if (!items) {
 }
 
 items.forEach(item => {
-    item.addEventListener('click', () => {
-        // Remove 'active' and 'show' from all items
+    const link = item.querySelector('.link') as HTMLElement;
+
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        const dropdown = item.querySelector('.dropdown');
+        const arrow = item.querySelector('.arrow-dropdown');
+        const isOpen = dropdown && dropdown.classList.contains('show');
+
+        // Close all dropdowns except the clicked one
         items.forEach(i => {
-            i.classList.remove('active');
-            const dropdown = i.querySelector('.dropdown');
-            if (dropdown) dropdown.classList.remove('show');
+            const itemDropDown = i.querySelector('.dropdown');
+            const itemArrow = i.querySelector(".arrow-dropdown");
+            if (i !== item) {
+                i.classList.remove('active');
+                if (itemDropDown) itemDropDown.classList.remove('show');
+                if (itemArrow) itemArrow.classList.remove("rotated");
+            }
         });
 
-        // Add 'active' to clicked item
-        item.classList.remove('active');
+        item.classList.add('active');
 
-        // Add 'show' to the dropdown of the clicked item, if it exists
-        const dropdown = item.querySelector('.dropdown');
-        if (dropdown) dropdown.classList.toggle('show');
+        // Toggle the clicked dropdown
+        if (dropdown) {
+            if (isOpen) {
+                dropdown.classList.remove('show');
+                if (arrow) arrow.classList.remove('rotated');
+            } else {
+                dropdown.classList.add('show');
+                if (arrow) arrow.classList.add('rotated');
+            }
+        }
     });
 });
 
@@ -97,7 +115,7 @@ function showPreview(previewElement: HTMLElement) {
 }
 
 function hideAll() {
-    
+
     alertPreview.classList.remove("show");
     announcementPreview.classList.remove("show");
     invertAndHide(alertCount);
@@ -337,7 +355,7 @@ const dynamicLoad = async (): Promise<void> => {
             let classInfo = createElement("div", "class-info");
             classInfo.innerHTML = `
             <span class="students">${info?.noOfStudents}</span>
-            <span class="vr"></span>
+            ${(info?.dates) ? `<span class="vr"></span>` : ""}
             <span class="dates">${info?.dates}</span>
             `
             cardDetails.appendChild(classInfo);

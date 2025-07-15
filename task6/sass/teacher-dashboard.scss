@@ -905,11 +905,12 @@ nav {
 @media screen and (max-width: 500px) {
     .notification {
 
-        .alert-list{
+        .alert-list {
             right: auto;
         }
+
         .announcement-list {
-            right: auto;
+            right: -5rem;
         }
     }
 }
