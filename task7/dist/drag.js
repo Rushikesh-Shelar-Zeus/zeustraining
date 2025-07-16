@@ -62,7 +62,6 @@ function handleResize() {
         return;
     }
     const backgroundDimensions = backgroundDiv.getBoundingClientRect();
-    const boxDimensions = backgroundDiv.getBoundingClientRect();
     let posLeft = parseFloat(box.style.left || "0");
     let posTop = parseFloat(box.style.top || "0");
     const maxLeft = backgroundDimensions.width - box.offsetWidth;
