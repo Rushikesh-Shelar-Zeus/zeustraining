@@ -9,17 +9,15 @@ body {
     main {
         width: 100%;
         height: 100%;
+        overflow: auto;
         position: relative;
-        overflow: scroll;
 
-        #scroll-area {
+        div {
             width: calc(500 * 100px); // 500 columns * default width
             height: calc(100000 * 24px); // 100000 rows * default height
         }
 
         canvas {
-            width: 100%;
-            height: 100%;
             position: absolute;
             top: 0;
             left: 0;

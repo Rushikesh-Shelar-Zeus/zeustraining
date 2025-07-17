@@ -61,16 +61,14 @@ body {
 body main {
   width: 100%;
   height: 100%;
+  overflow: auto;
   position: relative;
-  overflow: scroll;
 }
-body main #scroll-area {
+body main div {
   width: 50000px;
   height: 2400000px;
 }
 body main canvas {
-  width: 100%;
-  height: 100%;
   position: absolute;
   top: 0;
   left: 0;
