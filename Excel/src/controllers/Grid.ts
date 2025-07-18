@@ -1,40 +1,57 @@
 import { Renderer } from "./Renderer.js";
+import { CellSelectionConfig, GridOptions, HitTestContext, Viewport } from "../utils/types.js";
+import { SelectionManager } from "./selection/SelectionManager.js";
+import { HitTestHandler } from "./hittest/index.js";
+import { HitTestManager } from "./hittest/HitTestManager.js";
+import { CellHitTestHandler } from "./hittest/CellHitTestHandler.js";
+import { attachPointerEvents } from "./pointerEventHandlers.js";
 
-export interface GridOptions {
-    totalRows: number;
-    totalCols: number;
-    defaultRowHeight: number;
-    defaultColWidth: number;
-    headerHeight: number;
-    headerWidth: number;
-}
 
-export interface Viewport {
-    scrollX: number;
-    scrollY: number;
-    width: number;
-    height: number;
-}
-
+/**
+ * Grid class that manages the rendering of a grid with scrollable functionality.
+ * It initializes a canvas, sets up the viewport, and handles scrolling.
+ * Then renders the grid using the Renderer class.
+ */
 export class Grid {
+    /** @type {HTMLCanvasElement} - The canvas element used for rendering the grid */
     private readonly canvas: HTMLCanvasElement;
+
+    /** @type {CanvasRenderingContext2D} - The 2D rendering context for the canvas */
     private readonly ctx: CanvasRenderingContext2D;
+
+    /** @type {Renderer} - The Renderer instance responsible for rendering the grid */
     private renderer: Renderer;
 
+    /** @type {number} - Device Pixel Ratio for high DPI displays */
     private dpr: number = window.devicePixelRatio || 1;
 
-    private viewport: Viewport;
-
+    /** @type {Array<number>} - Stores the Widths of all the Columns */
     private columnWidths: number[];
+
+    /** @type {Array<number>} - Stores the Heights of all the Rows */
     private rowHeights: number[];
 
-    constructor(options: GridOptions) {
+    /** @type {CellSelectionConfig | null} - Stores the current cell selection configuration */
+    public selection: CellSelectionConfig | null = null;
+
+    /** @type {Viewport} Stores the Dimension of ViewPort */
+    public viewport: Viewport;
+
+    public selectionManager: SelectionManager;
+
+    public hitTestManager: HitTestManager;
+
+    /**
+     * Constructor for the Grid class.
+     * @param {GridOptions} options - GridOptions containing configuration for the grid.
+     */
+    constructor(public options: GridOptions) {
         const container = document.getElementById('container');
         if (!container) {
             throw new Error('Container element not found');
         }
 
-        // Set the Viewport dimensions based on the container size
+        // Set up the viewport dimensions based on the container size
         this.viewport = {
             scrollX: 0,
             scrollY: 0,
@@ -42,7 +59,7 @@ export class Grid {
             height: container.clientHeight
         };
 
-        // Initialize the Row and Column dimensions
+        // Initialize column widths and row heights based on options
         this.columnWidths = Array(options.totalCols).fill(options.defaultColWidth);
         this.rowHeights = Array(options.totalRows).fill(options.defaultRowHeight);
 
@@ -52,6 +69,7 @@ export class Grid {
         if (!this.ctx) {
             throw new Error('Failed to get canvas context');
         }
+
         // Set the Canvas dimensions based on the Viewport
         this.canvas.width = this.viewport.width * this.dpr;
         this.canvas.height = this.viewport.height * this.dpr;
@@ -63,58 +81,85 @@ export class Grid {
 
         // Create a Scrollable container
         const scrollContainer = document.createElement('div');
-        const { totalWidth, totalHeight } = this.getTotalDimensions();
+        scrollContainer.className = 'scrollable';
+
+        // Calculate the total width and height of the grid based on column and row dimensions
+        const { totalWidth, totalHeight } = this.getTotalDimensions(options);
 
         scrollContainer.style.overflow = 'auto';
         scrollContainer.style.width = this.viewport.width + 'px';
         scrollContainer.style.height = this.viewport.height + 'px';
+        scrollContainer.style.position = 'relative';
 
-        scrollContainer.style.width = totalWidth + 'px';
-        scrollContainer.style.height = totalHeight + 'px';
+        // Create a content div that defines the scrollable area
+        const scrollContent = document.createElement('div');
+        scrollContent.style.width = totalWidth + 'px';
+        scrollContent.style.height = totalHeight + 'px';
+        scrollContent.style.position = 'relative';
+
+        // Append the Canvas to the main container
+        container.appendChild(this.canvas);
+
+        // Append the scroll content to scroll container
+        scrollContainer.appendChild(scrollContent);
 
         // Append the Scrollable container to the main container
         container.appendChild(scrollContainer);
 
-        // Append the Canvas to the container
-        scrollContainer.appendChild(this.canvas);
-
-
+        // Pass the Configuration options to the Renderer
         this.renderer = new Renderer(
             options,
             this.ctx,
-            this.viewport,
             this.columnWidths,
-            this.rowHeights
+            this.rowHeights,
+            this
         );
 
-        this.renderer.render(this.viewport);
-        this.scrollHandler(container);
+        this.hitTestManager = new HitTestManager([
+            new CellHitTestHandler(this)
+        ]);
 
-        console.log(`Canvas created and appended to container
-            Values: 
-            Width: ${this.viewport.width}, Height: ${this.viewport.height},
-            DPR: ${this.dpr},
-            Canvas Width: ${this.canvas.width}, Canvas Height: ${this.canvas.height}
-            Context: ${this.ctx ? 'Available' : 'Not Available'}
-            Column Widths: ${this.columnWidths.length}, Row Heights: ${this.rowHeights.length}
-            Total Rows: ${options.totalRows}, Total Cols: ${options.totalCols}
-            Default Row Height: ${options.defaultRowHeight}, Default Col Width: ${options.defaultColWidth}
-            Header Height: ${options.headerHeight}, Header Width: ${options.headerWidth}
-            Viewport: ${JSON.stringify(this.viewport)}
-            Renderer: ${this.renderer ? 'Initialized' : 'Not Initialized'}
-            `);
+        this.selectionManager = new SelectionManager(this, this.renderer);
+
+        // Rrender the initial grid
+        this.renderer.render(this.viewport);
+
+        //Handle scrolling events
+        this.scrollHandler(scrollContainer);
+        attachPointerEvents(this.canvas, this.selectionManager, this.hitTestManager);
+
     }
 
+
+    /**
+     * Add a scroll event listener to the scroll container.
+     * Handles scroll events to update the viewport and re-render the grid.
+     * @param {HTMLDivElement} scrollContainer - The container that will handle scroll events.
+     */
     private scrollHandler(scrollContainer: HTMLElement) {
-        scrollContainer.addEventListener('scroll', () => {
+        scrollContainer.addEventListener('scroll', (event) => {
+            console.log('Scroll event triggered');
             this.viewport.scrollX = scrollContainer.scrollLeft;
             this.viewport.scrollY = scrollContainer.scrollTop;
 
             // Re-render the grid with the updated viewport
             this.renderer.render(this.viewport);
         });
+
+        // Add additional event listeners for debugging
+        scrollContainer.addEventListener('wheel', (event) => {
+            console.log('Wheel event detected');
+        });
+
+        scrollContainer.addEventListener("pointermove", (event) => {
+            console.log('Touch move detected');
+        });
     }
 
+    /**
+     * Observe the container for resize events to adjust the viewport and canvas dimensions.
+     * @param {HTMLElement} container - The container element to observe for resizing.
+     */
     private observeResize(container: HTMLElement) {
         const resizeObserver = new ResizeObserver(() => {
             this.viewport.width = container.clientWidth;
@@ -131,9 +176,31 @@ export class Grid {
         resizeObserver.observe(container);
     }
 
-    private getTotalDimensions(): { totalWidth: number, totalHeight: number } {
-        const totalWidth = this.columnWidths.reduce((sum, width) => sum + width, 0);
-        const totalHeight = this.rowHeights.reduce((sum, height) => sum + height, 0);
+    /**
+     * Calculate the total dimensions of the grid based on column widths and row heights.
+     * @param {GridOptions} options - The grid options containing header dimensions.
+     * @returns {Object} - An object containing total width and height of the grid.
+     */
+    private getTotalDimensions(options: GridOptions): { totalWidth: number, totalHeight: number } {
+        const totalWidth = this.columnWidths.reduce((sum, width) => sum + width, options.headerWidth);
+        const totalHeight = this.rowHeights.reduce((sum, height) => sum + height, options.headerHeight);
         return { totalWidth, totalHeight };
+    }
+
+    /**
+     * Get the HitTestContext for the grid.
+     * This context contains information about the grid's header dimensions, scroll position,
+     * and the current row heights and column widths.
+     * @returns {HitTestContext} - The context used for hit testing.
+     */
+    public get getHitTestContext(): HitTestContext {
+        return {
+            headerWidth: this.options.headerWidth,
+            headerHeight: this.options.headerHeight,
+            scrollX: this.viewport.scrollX,
+            scrollY: this.viewport.scrollY,
+            rowHeights: this.rowHeights,
+            columnWidths: this.columnWidths
+        }
     }
 }
