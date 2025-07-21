@@ -15,7 +15,8 @@ export class HitTestManager {
                 return result;
             }
         }
-        return null; // No hit test result found
+        // No hit test result found
+        return null;
     }
 
 }

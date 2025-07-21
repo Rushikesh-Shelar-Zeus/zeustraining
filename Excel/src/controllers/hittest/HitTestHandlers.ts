@@ -20,8 +20,6 @@ export class CellHitTestHandler implements HitTestHandler {
         let offsetX = x - headerWidth + scrollX;
         let offsetY = y - headerHeight + scrollY;
 
-        console.log(`Adjusted coordinates: (${offsetX}, ${offsetY})`);
-
         // Locate the Row
         let cum = 0, row = -1;
         for (let i = 0; i < rowHeights.length; i++) {
@@ -54,8 +52,6 @@ export class CellHitTestHandler implements HitTestHandler {
             console.log("Column not found");
             return null;
         }
-
-        console.log(`Hit detected at cell (${row}, ${col})`);
 
         return {
             type: "cell",

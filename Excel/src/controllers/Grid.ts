@@ -138,7 +138,6 @@ export class Grid {
      */
     private scrollHandler(scrollContainer: HTMLElement) {
         scrollContainer.addEventListener('scroll', (event) => {
-            console.log('Scroll event triggered');
             this.viewport.scrollX = scrollContainer.scrollLeft;
             this.viewport.scrollY = scrollContainer.scrollTop;
 
@@ -148,11 +147,26 @@ export class Grid {
 
         // Add additional event listeners for debugging
         scrollContainer.addEventListener('wheel', (event) => {
-            console.log('Wheel event detected');
         });
 
         scrollContainer.addEventListener("pointermove", (event) => {
-            console.log('Touch move detected');
+        });
+
+        scrollContainer.addEventListener("pointerdown", (event) => {
+            const rect = this.canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            console.log(`Pointer down at canvas coordinates: (${x}, ${y})`);
+
+            const hit = this.hitTestManager.hitTest(x, y);
+            console.log("Hit test result:", hit);
+
+            if (hit) {
+                this.selectionManager.handleCellSelection(hit);
+            } else {
+                console.log("No hit detected");
+            }
         });
     }
 
