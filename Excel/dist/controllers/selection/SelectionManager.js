@@ -1,4 +1,4 @@
-import { CellSelectionHandler } from "./Handlers.js";
+import { CellRangeSelectionHandler } from "./Handlers.js";
 /**
  * SelectionManager class that manages selection logic for the grid.
  * It uses different selection handlers based on the hit test result type.
@@ -12,9 +12,10 @@ export class SelectionManager {
     constructor(grid, renderer) {
         this.grid = grid;
         this.renderer = renderer;
+        this.currentHandler = null;
         // Initialize the handlers with the CellSelectionHandler
-        this.handlers = {
-            cell: new CellSelectionHandler(grid, () => this.renderer.render(grid.viewport))
+        this.handlersMap = {
+            cell: new CellRangeSelectionHandler(grid, () => this.renderer.render(grid.viewport))
         };
     }
     /**
@@ -27,9 +28,38 @@ export class SelectionManager {
             return;
         }
         // Delegate to the appropriate handler based on hit type
-        const handler = this.handlers[hit.type];
+        const handler = this.handlersMap[hit.type];
         if (handler) {
+            this.currentHandler = handler;
             handler.onPointerDown(hit);
         }
+    }
+    /**
+     * Handle pointer move events.
+     * @param {HitTestResult} hit - The hit test result.
+     */
+    handlePointerMove(hit) {
+        if (!hit) {
+            console.warn("No hit test result provided");
+            return;
+        }
+        if (!this.currentHandler) {
+            console.warn("No current selection handler set");
+            return;
+        }
+        // Call the onPointerMove method of the current handler if it exists
+        this.currentHandler?.onPointerMove?.(hit);
+    }
+    /**
+     * Handle pointer up events.
+     * @param {HitTestResult} hit - The hit test result.
+     */
+    handlePointerUp(hit) {
+        if (!this.currentHandler) {
+            return;
+        }
+        // Call the onPointerUp method of the current handler if it exists
+        this.currentHandler?.onPointerUp?.(hit);
+        this.currentHandler = null;
     }
 }

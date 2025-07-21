@@ -15,5 +15,11 @@ export type HitTestResult =
  * This interface defines the contract for hit test handlers.
  */
 export interface HitTestHandler {
+    /**
+     * Handles pointer down events for hit testing.
+     * @param {number} x - The x-coordinate of the pointer.
+     * @param {number} y - The y-coordinate of the pointer.
+     * @return {HitTestResult | null} - The result of the hit test, which can be a cell hit or null.
+     */
     hitTest(x: number, y: number): HitTestResult | null;
 }   

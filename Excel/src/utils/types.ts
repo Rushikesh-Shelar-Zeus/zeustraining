@@ -38,4 +38,6 @@ export interface CellSelectionConfig {
     startCol: number;
     endRow: number;
     endCol: number;
+    originRow: number;
+    originCol: number;
 }

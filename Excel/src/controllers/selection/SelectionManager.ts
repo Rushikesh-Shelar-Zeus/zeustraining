@@ -1,7 +1,7 @@
 import { Grid } from "../Grid.js";
 import { HitTestResult } from "../hittest/index.js";
 import { Renderer } from "../Renderer.js";
-import { CellSelectionHandler } from "./Handlers.js";
+import { CellRangeSelectionHandler, CellSelectionHandler } from "./Handlers.js";
 import { SelectionHandler } from "./index.js";
 
 /**
@@ -10,9 +10,11 @@ import { SelectionHandler } from "./index.js";
  */
 export class SelectionManager {
     /** @type {Record<string, SelectionHandler>} */
-    private handlers: {
+    private handlersMap: {
         cell?: SelectionHandler;
     };
+
+    private currentHandler: SelectionHandler | null = null;
 
     /**
      * Constructor for the SelectionManager.
@@ -24,8 +26,8 @@ export class SelectionManager {
         private readonly renderer: Renderer
     ) {
         // Initialize the handlers with the CellSelectionHandler
-        this.handlers = {
-            cell: new CellSelectionHandler(grid, () => this.renderer.render(grid.viewport))
+        this.handlersMap = {
+            cell: new CellRangeSelectionHandler(grid, () => this.renderer.render(grid.viewport))
         };
     }
 
@@ -34,15 +36,47 @@ export class SelectionManager {
      * @param {HitTestResult} hit - The hit test result. 
      */
     handlePointerDown(hit: HitTestResult): void {
-        if(!hit) {
+        if (!hit) {
             console.warn("No hit test result provided");
             return;
         }
-        
+
         // Delegate to the appropriate handler based on hit type
-        const handler = this.handlers[hit.type];
+        const handler = this.handlersMap[hit.type];
         if (handler) {
+            this.currentHandler = handler;
             handler.onPointerDown(hit);
         }
+    }
+
+    /**
+     * Handle pointer move events.
+     * @param {HitTestResult} hit - The hit test result.
+     */
+    handlePointerMove(hit: HitTestResult): void {
+        if (!hit) {
+            console.warn("No hit test result provided");
+            return;
+        }
+
+        if (!this.currentHandler) {
+            console.warn("No current selection handler set");
+            return;
+        }
+        // Call the onPointerMove method of the current handler if it exists
+        this.currentHandler?.onPointerMove?.(hit);
+    }
+
+    /**
+     * Handle pointer up events.
+     * @param {HitTestResult} hit - The hit test result.
+     */
+    handlePointerUp(hit: HitTestResult): void {
+        if (!this.currentHandler) {
+            return;
+        }
+        // Call the onPointerUp method of the current handler if it exists
+        this.currentHandler?.onPointerUp?.(hit);
+        this.currentHandler = null;
     }
 }
