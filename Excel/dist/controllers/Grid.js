@@ -2,7 +2,7 @@ import { Renderer } from "./Renderer.js";
 import { SelectionManager } from "./selection/SelectionManager.js";
 import { HitTestManager } from "./hittest/HitTestManager.js";
 import { CellHitTestHandler } from "./hittest/Handlers.js";
-import { attachPointerEvents } from "./pointerEventHandlers.js";
+import { PointerEventManager } from "./pointerEventHandlers.js";
 /**
  * Grid class that manages the rendering of a grid with scrollable functionality.
  * It initializes a canvas, sets up the viewport, and handles scrolling.
@@ -19,6 +19,8 @@ export class Grid {
         this.dpr = window.devicePixelRatio || 1;
         /** @type {CellSelectionConfig | null} - Stores the current cell selection configuration */
         this.selection = null;
+        /** @type {{ x: number, y: number } | null} - To get the latest Pointer Position for auto-scrolling */
+        this.currentPointerPosition = null;
         const container = document.getElementById('container');
         if (!container) {
             throw new Error('Container element not found');
@@ -79,7 +81,7 @@ export class Grid {
         //Handle scrolling events
         this.scrollHandler(scrollContainer);
         // Attach pointer events to the canvas for hit testing and selection
-        attachPointerEvents(this.canvas, scrollContainer, this.selectionManager, this.hitTestManager);
+        this.pointerEventManager = new PointerEventManager(this.canvas, scrollContainer, this.selectionManager, this.hitTestManager);
     }
     /**
      * Add a scroll event listener to the scroll container.
@@ -137,6 +139,18 @@ export class Grid {
         const totalWidth = this.columnWidths.reduce((sum, width) => sum + width, options.headerWidth);
         const totalHeight = this.rowHeights.reduce((sum, height) => sum + height, options.headerHeight);
         return { totalWidth, totalHeight };
+    }
+    scrollBy(deltaX, deltaY) {
+        this.viewport.scrollX = Math.max(0, Math.min(this.viewport.scrollX + deltaX, this.getMaxScrollX()));
+        this.viewport.scrollY = Math.max(0, Math.min(this.viewport.scrollY + deltaY, this.getMaxScrollY()));
+    }
+    getMaxScrollX() {
+        const { totalWidth } = this.getTotalDimensions(this.options);
+        return totalWidth - this.viewport.width;
+    }
+    getMaxScrollY() {
+        const { totalHeight } = this.getTotalDimensions(this.options);
+        return totalHeight - this.viewport.height;
     }
     /**
      * Get the HitTestContext for the grid.

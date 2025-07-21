@@ -9,9 +9,7 @@ import {
     HitTestContext,
     Viewport
 } from "../utils/types.js";
-
-import { attachPointerEvents } from "./pointerEventHandlers.js";
-
+import { PointerEventManager } from "./pointerEventHandlers.js";
 
 /**
  * Grid class that manages the rendering of a grid with scrollable functionality.
@@ -48,6 +46,12 @@ export class Grid {
 
     /** @type {HitTestManager} - Manages hit testing for the Grid (CELL, ROW, COLUMN, RANGE) */
     public hitTestManager: HitTestManager;
+
+    /** @type {PointerEventManager} - Manages pointer events for the Grid */
+    private readonly pointerEventManager: PointerEventManager;
+
+    /** @type {{ x: number, y: number } | null} - To get the latest Pointer Position for auto-scrolling */
+    public currentPointerPosition: { x: number, y: number } | null = null;
 
     /**
      * Constructor for the Grid class.
@@ -138,8 +142,12 @@ export class Grid {
         this.scrollHandler(scrollContainer);
 
         // Attach pointer events to the canvas for hit testing and selection
-        attachPointerEvents(this.canvas, scrollContainer, this.selectionManager, this.hitTestManager);
-
+        this.pointerEventManager = new PointerEventManager(
+            this.canvas,
+            scrollContainer,
+            this.selectionManager,
+            this.hitTestManager
+        );
     }
 
 
@@ -211,6 +219,21 @@ export class Grid {
         const totalWidth = this.columnWidths.reduce((sum, width) => sum + width, options.headerWidth);
         const totalHeight = this.rowHeights.reduce((sum, height) => sum + height, options.headerHeight);
         return { totalWidth, totalHeight };
+    }
+
+    scrollBy(deltaX: number, deltaY: number): void {
+        this.viewport.scrollX = Math.max(0, Math.min(this.viewport.scrollX + deltaX, this.getMaxScrollX()));
+        this.viewport.scrollY = Math.max(0, Math.min(this.viewport.scrollY + deltaY, this.getMaxScrollY()));
+    }
+
+    private getMaxScrollX(): number {
+        const { totalWidth } = this.getTotalDimensions(this.options);
+        return totalWidth - this.viewport.width;
+    }
+
+    private getMaxScrollY(): number {
+        const { totalHeight } = this.getTotalDimensions(this.options);
+        return totalHeight - this.viewport.height;
     }
 
     /**
