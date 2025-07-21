@@ -13,6 +13,7 @@ export const COLORS = {
     cellBackground: "#ffffff",
     cellText: "#000000",
     selectedCellOutline: "rgba(102, 240, 97, 1)",
+    selectedCellBackground: "rgba(102, 240, 97, 0.3)",
 }
 
 // Configuration for rendering styles
@@ -21,4 +22,5 @@ export const CONFIG = {
     headerFont: "14px Arial",
     textBaseline: "middle",
     textAlign: "center",
+    selectedLineWidth: 2,
 }

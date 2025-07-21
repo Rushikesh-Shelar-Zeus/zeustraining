@@ -28,7 +28,7 @@ export class Renderer {
     render(viewPort) {
         // Clear the canvas for the current viewport
         this.ctx.clearRect(0, 0, viewPort.width, viewPort.height);
-        // Render the grid lines first, then headers on top
+        // Render the grid lines first, then selection, then headers on top
         this.renderGridLines(viewPort);
         this.renderHeaders(viewPort);
         this.drawCellSelection(viewPort);
@@ -253,10 +253,14 @@ export class Renderer {
         if (!selected || selected.type !== "cell") {
             return; // Only handle cell selections
         }
-        const { startRow, startCol, endRow, endCol } = selected;
-        const { scrollX, scrollY } = viewPort;
+        // Get the start row and column from the selection
+        const { startRow, startCol } = selected;
         // Calculate the position of the selected cell
-        let x = this.options.headerWidth;
+        const { scrollX, scrollY } = viewPort;
+        // Use dynamic header width instead of static header width
+        const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewPort);
+        // Calculate the position of the selected cell
+        let x = dynamicHeaderWidth;
         for (let col = 0; col < startCol; col++) {
             x += this.columnWidths[col];
         }
@@ -264,21 +268,62 @@ export class Renderer {
         for (let row = 0; row < startRow; row++) {
             y += this.rowHeights[row];
         }
+        // Calculate the width and height of the selected cell
         const cellWidth = this.columnWidths[startCol];
         const cellHeight = this.rowHeights[startRow];
         // Adjust for scroll position
         const drawX = x - scrollX;
         const drawY = y - scrollY;
-        // Draw the selection rectangle
-        this.ctx.save();
-        this.ctx.fillStyle = COLORS.selectedCellOutline;
-        this.ctx.globalAlpha = 0.3; // Semi-transparent fill
-        this.ctx.fillRect(drawX, drawY, cellWidth, cellHeight);
-        // Draw selection border
-        this.ctx.globalAlpha = 1.0;
-        this.ctx.strokeStyle = COLORS.selectedCellOutline;
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeRect(drawX, drawY, cellWidth, cellHeight);
-        this.ctx.restore();
+        // Draw the selection rectangle on Headers (Row, Column)
+        this.ctx.fillStyle = COLORS.selectedCellBackground;
+        this.ctx.fillRect(drawX, 0, cellWidth, this.options.headerHeight);
+        this.ctx.fillRect(0, drawY, this.options.headerWidth, cellHeight);
+        // Only draw if the selection is within the visible viewport
+        if (drawX + cellWidth > dynamicHeaderWidth &&
+            drawY + cellHeight > this.options.headerHeight &&
+            drawX < viewPort.width &&
+            drawY < viewPort.height) {
+            // Save the current canvas state
+            this.ctx.save();
+            // Create a clipping region to prevent drawing over headers
+            this.ctx.beginPath();
+            this.ctx.rect(dynamicHeaderWidth, this.options.headerHeight, viewPort.width - dynamicHeaderWidth, viewPort.height - this.options.headerHeight);
+            this.ctx.clip();
+            // Calculate the actual drawing area (clipped to not overlap headers)
+            const clippedX = Math.max(drawX, dynamicHeaderWidth);
+            const clippedY = Math.max(drawY, this.options.headerHeight);
+            const clippedWidth = Math.min(drawX + cellWidth, viewPort.width) - clippedX;
+            const clippedHeight = Math.min(drawY + cellHeight, viewPort.height) - clippedY;
+            // Only draw if there's something visible after clipping
+            if (clippedWidth > 0 && clippedHeight > 0) {
+                // Draw the selection rectangle
+                this.ctx.fillStyle = COLORS.selectedCellOutline;
+                // Draw selection border
+                this.ctx.globalAlpha = 1.0;
+                this.ctx.strokeStyle = COLORS.selectedCellOutline;
+                this.ctx.lineWidth = CONFIG.selectedLineWidth;
+                this.ctx.strokeRect(clippedX, clippedY, clippedWidth, clippedHeight);
+            }
+            // Restore the canvas state
+            this.ctx.restore();
+            // Draw row header vertical highlight (right edge of row header)
+            const headerY = drawY;
+            const headerHeight = cellHeight;
+            const headerX = this.options.headerWidth;
+            this.ctx.beginPath();
+            this.ctx.strokeStyle = COLORS.selectedCellOutline;
+            this.ctx.lineWidth = CONFIG.selectedLineWidth;
+            this.ctx.moveTo(headerX, headerY);
+            this.ctx.lineTo(headerX, headerY + headerHeight);
+            this.ctx.stroke();
+            // Draw column header horizontal highlight (bottom edge of column header)
+            const headerX2 = drawX;
+            const headerWidth = cellWidth;
+            const headerY2 = this.options.headerHeight;
+            this.ctx.beginPath();
+            this.ctx.moveTo(headerX2, headerY2);
+            this.ctx.lineTo(headerX2 + headerWidth, headerY2);
+            this.ctx.stroke();
+        }
     }
 }

@@ -1,9 +1,15 @@
 import { Renderer } from "./Renderer.js";
-import { CellSelectionConfig, GridOptions, HitTestContext, Viewport } from "../utils/types.js";
 import { SelectionManager } from "./selection/SelectionManager.js";
-import { HitTestHandler } from "./hittest/index.js";
 import { HitTestManager } from "./hittest/HitTestManager.js";
-import { CellHitTestHandler } from "./hittest/CellHitTestHandler.js";
+import { CellHitTestHandler } from "./hittest/Handlers.js";
+
+import {
+    CellSelectionConfig,
+    GridOptions,
+    HitTestContext,
+    Viewport
+} from "../utils/types.js";
+
 import { attachPointerEvents } from "./pointerEventHandlers.js";
 
 
@@ -34,11 +40,13 @@ export class Grid {
     /** @type {CellSelectionConfig | null} - Stores the current cell selection configuration */
     public selection: CellSelectionConfig | null = null;
 
-    /** @type {Viewport} Stores the Dimension of ViewPort */
+    /** @type {Viewport} - Stores the Dimension of ViewPort */
     public viewport: Viewport;
 
+    /** @type {SelectionManager} - Manages the Selection for the Grid */
     public selectionManager: SelectionManager;
 
+    /** @type {HitTestManager} - Manages hit testing for the Grid (CELL, ROW, COLUMN, RANGE) */
     public hitTestManager: HitTestManager;
 
     /**
@@ -115,10 +123,12 @@ export class Grid {
             this
         );
 
+        // Initialize the HitTestManager with all HitTestHandlers
         this.hitTestManager = new HitTestManager([
             new CellHitTestHandler(this)
         ]);
 
+        // Create a SelectionManager instance, handles the Selection Logic
         this.selectionManager = new SelectionManager(this, this.renderer);
 
         // Rrender the initial grid
@@ -126,7 +136,9 @@ export class Grid {
 
         //Handle scrolling events
         this.scrollHandler(scrollContainer);
-        attachPointerEvents(this.canvas, this.selectionManager, this.hitTestManager);
+
+        // Attach pointer events to the canvas for hit testing and selection
+        attachPointerEvents(this.canvas, scrollContainer, this.selectionManager, this.hitTestManager);
 
     }
 
@@ -152,22 +164,22 @@ export class Grid {
         scrollContainer.addEventListener("pointermove", (event) => {
         });
 
-        scrollContainer.addEventListener("pointerdown", (event) => {
-            const rect = this.canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
+        // scrollContainer.addEventListener("pointerdown", (event) => {
+        //     const rect = this.canvas.getBoundingClientRect();
+        //     const x = event.clientX - rect.left;
+        //     const y = event.clientY - rect.top;
 
-            console.log(`Pointer down at canvas coordinates: (${x}, ${y})`);
+        //     console.log(`Pointer down at canvas coordinates: (${x}, ${y})`);
 
-            const hit = this.hitTestManager.hitTest(x, y);
-            console.log("Hit test result:", hit);
+        //     const hit = this.hitTestManager.hitTest(x, y);
+        //     console.log("Hit test result:", hit);
 
-            if (hit) {
-                this.selectionManager.handleCellSelection(hit);
-            } else {
-                console.log("No hit detected");
-            }
-        });
+        //     if (hit) {
+        //         this.selectionManager.handleCellSelection(hit);
+        //     } else {
+        //         console.log("No hit detected");
+        //     }
+        // });
     }
 
     /**

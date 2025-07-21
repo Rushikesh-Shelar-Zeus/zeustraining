@@ -1,7 +1,7 @@
 import { Renderer } from "./Renderer.js";
 import { SelectionManager } from "./selection/SelectionManager.js";
 import { HitTestManager } from "./hittest/HitTestManager.js";
-import { CellHitTestHandler } from "./hittest/CellHitTestHandler.js";
+import { CellHitTestHandler } from "./hittest/Handlers.js";
 import { attachPointerEvents } from "./pointerEventHandlers.js";
 /**
  * Grid class that manages the rendering of a grid with scrollable functionality.
@@ -68,15 +68,18 @@ export class Grid {
         container.appendChild(scrollContainer);
         // Pass the Configuration options to the Renderer
         this.renderer = new Renderer(options, this.ctx, this.columnWidths, this.rowHeights, this);
+        // Initialize the HitTestManager with all HitTestHandlers
         this.hitTestManager = new HitTestManager([
             new CellHitTestHandler(this)
         ]);
+        // Create a SelectionManager instance, handles the Selection Logic
         this.selectionManager = new SelectionManager(this, this.renderer);
         // Rrender the initial grid
         this.renderer.render(this.viewport);
         //Handle scrolling events
         this.scrollHandler(scrollContainer);
-        attachPointerEvents(this.canvas, this.selectionManager, this.hitTestManager);
+        // Attach pointer events to the canvas for hit testing and selection
+        attachPointerEvents(this.canvas, scrollContainer, this.selectionManager, this.hitTestManager);
     }
     /**
      * Add a scroll event listener to the scroll container.
@@ -95,20 +98,19 @@ export class Grid {
         });
         scrollContainer.addEventListener("pointermove", (event) => {
         });
-        scrollContainer.addEventListener("pointerdown", (event) => {
-            const rect = this.canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            console.log(`Pointer down at canvas coordinates: (${x}, ${y})`);
-            const hit = this.hitTestManager.hitTest(x, y);
-            console.log("Hit test result:", hit);
-            if (hit) {
-                this.selectionManager.handleCellSelection(hit);
-            }
-            else {
-                console.log("No hit detected");
-            }
-        });
+        // scrollContainer.addEventListener("pointerdown", (event) => {
+        //     const rect = this.canvas.getBoundingClientRect();
+        //     const x = event.clientX - rect.left;
+        //     const y = event.clientY - rect.top;
+        //     console.log(`Pointer down at canvas coordinates: (${x}, ${y})`);
+        //     const hit = this.hitTestManager.hitTest(x, y);
+        //     console.log("Hit test result:", hit);
+        //     if (hit) {
+        //         this.selectionManager.handleCellSelection(hit);
+        //     } else {
+        //         console.log("No hit detected");
+        //     }
+        // });
     }
     /**
      * Observe the container for resize events to adjust the viewport and canvas dimensions.
