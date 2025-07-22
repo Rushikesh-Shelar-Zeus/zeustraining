@@ -8,10 +8,18 @@ export type HitTestResult =
         type: "cell";
         row: number;
         col: number;
+    } |
+    {
+        type: "row";
+        row: number;
+    } |
+    {
+        type: "col";
+        col: number;
     } | null;
 
 /**
- * Hti Test Handler Interface
+ * Hit Test Handler Interface
  * This interface defines the contract for hit test handlers.
  */
 export interface HitTestHandler {

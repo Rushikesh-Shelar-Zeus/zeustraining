@@ -6,7 +6,7 @@ export const HEADER_HEIGHT = 24;
 export const HEADER_WIDTH = 40;
 // Constants for grid rendering
 export const COLORS = {
-    gridLines: "#ccc",
+    gridLines: "#cccccc",
     headerBackground: "#f0f0f0",
     headerText: "#000000",
     cellBackground: "#ffffff",

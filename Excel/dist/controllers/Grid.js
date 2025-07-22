@@ -1,7 +1,7 @@
 import { Renderer } from "./Renderer.js";
 import { SelectionManager } from "./selection/SelectionManager.js";
 import { HitTestManager } from "./hittest/HitTestManager.js";
-import { CellHitTestHandler } from "./hittest/Handlers.js";
+import { CellHitTestHandler, ColumnHeaderHitTestHandler, RowHitTestHandler } from "./hittest/Handlers.js";
 import { PointerEventManager } from "./pointerEventHandlers.js";
 /**
  * Grid class that manages the rendering of a grid with scrollable functionality.
@@ -72,7 +72,9 @@ export class Grid {
         this.renderer = new Renderer(options, this.ctx, this.columnWidths, this.rowHeights, this);
         // Initialize the HitTestManager with all HitTestHandlers
         this.hitTestManager = new HitTestManager([
-            new CellHitTestHandler(this)
+            new RowHitTestHandler(this),
+            new ColumnHeaderHitTestHandler(this),
+            new CellHitTestHandler(this),
         ]);
         // Create a SelectionManager instance, handles the Selection Logic
         this.selectionManager = new SelectionManager(this, this.renderer);
@@ -140,14 +142,30 @@ export class Grid {
         const totalHeight = this.rowHeights.reduce((sum, height) => sum + height, options.headerHeight);
         return { totalWidth, totalHeight };
     }
+    /**
+     * Scroll the grid by a specified delta in x and y directions.
+     * This method updates the viewport's scroll position and ensures it does not exceed the maximum scroll limits.
+     * @param {number} deltaX - The amount to scroll in the x direction.
+     * @param {number} deltaY - The amount to scroll in the y direction.
+     */
     scrollBy(deltaX, deltaY) {
         this.viewport.scrollX = Math.max(0, Math.min(this.viewport.scrollX + deltaX, this.getMaxScrollX()));
         this.viewport.scrollY = Math.max(0, Math.min(this.viewport.scrollY + deltaY, this.getMaxScrollY()));
     }
+    /**
+     * Get the maximum scroll limits for the grid.
+     * This method calculates the maximum scroll positions based on the total dimensions of the grid.
+     * @returns {number} - The maximum scroll position in the x direction.
+     */
     getMaxScrollX() {
         const { totalWidth } = this.getTotalDimensions(this.options);
         return totalWidth - this.viewport.width;
     }
+    /**
+     * Get the maximum scroll position in the y direction.
+     * This method calculates the maximum scroll position based on the total height of the grid.
+     * @returns {number} - The maximum scroll position in the y direction.
+     */
     getMaxScrollY() {
         const { totalHeight } = this.getTotalDimensions(this.options);
         return totalHeight - this.viewport.height;
@@ -158,14 +176,26 @@ export class Grid {
      * and the current row heights and column widths.
      * @returns {HitTestContext} - The context used for hit testing.
      */
-    get getHitTestContext() {
+    get HitTestContext() {
         return {
-            headerWidth: this.options.headerWidth,
+            headerWidth: this.renderer.getDynamicHeaderWidth(this.viewport),
             headerHeight: this.options.headerHeight,
             scrollX: this.viewport.scrollX,
             scrollY: this.viewport.scrollY,
             rowHeights: this.rowHeights,
             columnWidths: this.columnWidths
         };
+    }
+    /**
+     * Get the total number of rows in the grid.
+     */
+    get totalRows() {
+        return this.options.totalRows;
+    }
+    /**
+     * Get the total number of columns in the grid.
+     */
+    get totalCols() {
+        return this.options.totalCols;
     }
 }

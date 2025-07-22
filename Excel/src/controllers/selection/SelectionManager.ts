@@ -1,7 +1,7 @@
 import { Grid } from "../Grid.js";
 import { HitTestResult } from "../hittest/index.js";
 import { Renderer } from "../Renderer.js";
-import { CellRangeSelectionHandler, CellSelectionHandler } from "./Handlers.js";
+import { CellRangeSelectionHandler, CellSelectionHandler, ColumnSelectionHandler, RowSelectionHandler } from "./Handlers.js";
 import { SelectionHandler } from "./index.js";
 
 /**
@@ -12,6 +12,8 @@ export class SelectionManager {
     /** @type {Record<string, SelectionHandler>} */
     private handlersMap: {
         cell?: SelectionHandler;
+        row?: SelectionHandler;
+        col?: SelectionHandler;
     };
 
     private currentHandler: SelectionHandler | null = null;
@@ -27,7 +29,9 @@ export class SelectionManager {
     ) {
         // Initialize the handlers with the CellSelectionHandler
         this.handlersMap = {
-            cell: new CellRangeSelectionHandler(grid, () => this.renderer.render(grid.viewport))
+            cell: new CellRangeSelectionHandler(grid, () => this.renderer.render(grid.viewport)),
+            row: new RowSelectionHandler(grid, () => this.renderer.render(grid.viewport)),
+            col: new ColumnSelectionHandler(grid, () => this.renderer.render(grid.viewport))
         };
     }
 
@@ -45,6 +49,7 @@ export class SelectionManager {
         const handler = this.handlersMap[hit.type];
         if (handler) {
             this.currentHandler = handler;
+            console.log(this.currentHandler);
             handler.onPointerDown(hit);
         }
     }

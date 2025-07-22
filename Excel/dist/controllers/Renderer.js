@@ -31,8 +31,11 @@ export class Renderer {
         // Render the grid lines first, then selection, then headers on top
         this.renderGridLines(viewPort);
         this.renderHeaders(viewPort);
-        // Render the cell range selection
+        // Draw the cell selection rectangle
         this.drawCellRangeSelection(viewPort);
+        // Draw row and column selections
+        this.drawRowSelection(viewPort);
+        this.drawColumnSelection(viewPort);
     }
     /**
      * Calculates the dynamic Row header width based on the maximum visible row number.
@@ -72,8 +75,8 @@ export class Renderer {
             const x = col * this.options.defaultColWidth - viewPort.scrollX + dynamicHeaderWidth;
             this.ctx.beginPath();
             // Start below column headers
-            this.ctx.moveTo(x, this.options.headerHeight);
-            this.ctx.lineTo(x, viewPort.height);
+            this.ctx.moveTo(x + 0.5, this.options.headerHeight);
+            this.ctx.lineTo(x + 0.5, viewPort.height);
             this.ctx.stroke();
         }
         // Draw horizontal lines - offset by header height to start after column headers
@@ -82,8 +85,8 @@ export class Renderer {
             const y = row * this.options.defaultRowHeight - viewPort.scrollY + this.options.headerHeight;
             this.ctx.beginPath();
             // Start after row headers
-            this.ctx.moveTo(dynamicHeaderWidth, y);
-            this.ctx.lineTo(viewPort.width, y);
+            this.ctx.moveTo(dynamicHeaderWidth + 0.5, y);
+            this.ctx.lineTo(viewPort.width + 0.5, y);
             this.ctx.stroke();
         }
     }
@@ -142,16 +145,16 @@ export class Renderer {
         for (let col = startCol; col <= endCol + 1; col++) {
             const x = col * this.options.defaultColWidth - viewPort.scrollX + dynamicHeaderWidth;
             this.ctx.beginPath();
-            this.ctx.moveTo(x, 0);
-            this.ctx.lineTo(x, this.options.headerHeight);
+            this.ctx.moveTo(x + 0.5, 0);
+            this.ctx.lineTo(x + 0.5, this.options.headerHeight);
             this.ctx.stroke();
         }
         // Draw horizontal lines for row headers (separating each row header)
         for (let row = startRow; row <= endRow + 1; row++) {
             const y = row * this.options.defaultRowHeight - viewPort.scrollY + this.options.headerHeight;
             this.ctx.beginPath();
-            this.ctx.moveTo(0, y);
-            this.ctx.lineTo(dynamicHeaderWidth, y);
+            this.ctx.moveTo(0 + 0.5, y);
+            this.ctx.lineTo(dynamicHeaderWidth + 0.5, y);
             this.ctx.stroke();
         }
         // Draw the border around the top-left corner (intersection of headers)
@@ -230,7 +233,7 @@ export class Renderer {
         };
     }
     /**
-     * A Binary Serach basd Function to Find the Start Index of the Visible Range.
+     * A Binary Search based Function to Find the Start Index of the Visible Range.
      * This function finds the first index in the offsets array where the value is greater than or equal to the scroll position.
      * @param {Array<number>} offsets - An array of offsets (cumulative widths or heights).
      * @param {number} scroll - The scroll position to find the start index for.
@@ -465,5 +468,297 @@ export class Renderer {
             let cellHeight = this.rowHeights[row];
             this.ctx.fillRect(0, drawY, dynamicHeaderWidth, cellHeight); // left header column
         }
+    }
+    /**
+     * Draws the row selection rectangle on the canvas.
+     * This method highlights the selected rows based on the current selection.
+     * It draws a rectangle around the selected rows and highlights the row headers.
+     * @param {Viewport} viewPort - The current viewport dimensions and scroll position.
+     * @returns {void}
+     */
+    drawRowSelection(viewPort) {
+        const selected = this.grid.selection;
+        if (!selected || selected.type !== "row") {
+            return; // Only handle row selections
+        }
+        // Get the start and end rows from the selection
+        const { startRow, endRow, originRow, originCol } = selected;
+        const { scrollX, scrollY } = viewPort;
+        const headerHeight = this.options.headerHeight;
+        const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewPort);
+        const { startCol, endCol } = this.getvisibleRange(viewPort);
+        const fromRow = Math.min(startRow, endRow);
+        const toRow = Math.max(startRow, endRow);
+        this.ctx.save();
+        // Create clipping region for the content area (excluding headers)
+        this.ctx.beginPath();
+        this.ctx.rect(dynamicHeaderWidth, headerHeight, viewPort.width - dynamicHeaderWidth, viewPort.height - headerHeight);
+        this.ctx.clip();
+        let outerY = Number.MAX_SAFE_INTEGER;
+        let outerY2 = 0;
+        // Check if the origin column is in the visible range
+        const originColVisible = originCol >= startCol && originCol <= endCol;
+        // Loop through selected rows and visible columns
+        for (let row = fromRow; row <= toRow; row++) {
+            let y = headerHeight;
+            for (let r = 0; r < row; r++)
+                y += this.rowHeights[r];
+            let drawY = y - scrollY;
+            let rowHeight = this.rowHeights[row] || this.options.defaultRowHeight;
+            // Skip off-screen rows
+            if (drawY + rowHeight <= headerHeight || drawY >= viewPort.height) {
+                continue;
+            }
+            // Loop through all visible columns for this row
+            for (let col = startCol; col <= endCol; col++) {
+                let x = dynamicHeaderWidth;
+                for (let c = 0; c < col; c++)
+                    x += this.columnWidths[c];
+                let drawX = x - scrollX;
+                let cellWidth = this.columnWidths[col] || this.options.defaultColWidth;
+                // Skip off-screen cells
+                if (drawX + cellWidth <= dynamicHeaderWidth || drawX >= viewPort.width) {
+                    continue;
+                }
+                // The origin cell is only white if it's the origin row AND origin column AND visible
+                const isOrigin = row === originRow && col === originCol && originColVisible;
+                if (!isOrigin) {
+                    this.ctx.fillStyle = COLORS.selectedCellOutline;
+                    this.ctx.globalAlpha = 0.2;
+                    this.ctx.fillRect(drawX, drawY, cellWidth, rowHeight);
+                }
+            }
+            // Track outer bounding box for the selection rectangle
+            outerY = Math.min(outerY, drawY);
+            outerY2 = Math.max(outerY2, drawY + rowHeight);
+        }
+        // Draw border around the visible selection area only if there are visible rows
+        if (outerY !== Number.MAX_SAFE_INTEGER && outerY2 > outerY) {
+            this.ctx.globalAlpha = 1;
+            this.ctx.lineWidth = CONFIG.selectedLineWidth;
+            this.ctx.strokeStyle = COLORS.selectedCellOutline;
+            const contentWidth = viewPort.width - dynamicHeaderWidth;
+            const height = outerY2 - outerY;
+            this.ctx.strokeRect(dynamicHeaderWidth, outerY, contentWidth, height);
+        }
+        this.ctx.restore();
+        // Draw row and column header highlights
+        this.drawRowHeaderHighlights(fromRow, toRow, viewPort);
+        this.drawColumnHeadersForRowSelection(viewPort);
+    }
+    /**
+     * Draws highlights for the row headers based on the selected row range.
+     * Highlights the row headers for the selected rows.
+     * @param {number} startRow - The starting row index of the selection.
+     * @param {number} endRow - The ending row index of the selection.
+     * @param {Viewport} viewport - The current viewport dimensions and scroll position.
+     * @returns {void}
+     */
+    drawRowHeaderHighlights(startRow, endRow, viewport) {
+        const { headerHeight } = this.options;
+        const { scrollY } = viewport;
+        const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewport);
+        const fromRow = Math.min(startRow, endRow);
+        const toRow = Math.max(startRow, endRow);
+        this.ctx.save();
+        this.ctx.fillStyle = COLORS.selectedCellBackground;
+        for (let row = fromRow; row <= toRow; row++) {
+            let y = headerHeight;
+            for (let r = 0; r < row; r++)
+                y += this.rowHeights[r];
+            let drawY = y - scrollY;
+            let rowHeight = this.rowHeights[row];
+            // Only draw header highlight if the row is visible
+            if (drawY + rowHeight >= headerHeight && drawY <= viewport.height) {
+                this.ctx.fillRect(0, drawY, dynamicHeaderWidth, rowHeight);
+            }
+            // Draw the right border of the row header
+            this.ctx.beginPath();
+            this.ctx.strokeStyle = COLORS.selectedCellOutline;
+            this.ctx.lineWidth = CONFIG.selectedLineWidth;
+            this.ctx.moveTo(dynamicHeaderWidth, drawY);
+            this.ctx.lineTo(dynamicHeaderWidth, drawY + rowHeight);
+            this.ctx.stroke();
+        }
+        this.ctx.restore();
+    }
+    /**
+     * Draws highlights for the column headers based on the selected row range.
+     * Highlights the column headers for the selected rows.
+     * @param {Viewport} viewport - The current viewport dimensions and scroll position.
+     * @returns {void}
+     */
+    drawColumnHeadersForRowSelection(viewport) {
+        const { scrollX } = viewport;
+        const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewport);
+        const { startCol, endCol } = this.getvisibleRange(viewport);
+        this.ctx.save();
+        this.ctx.fillStyle = COLORS.selectedCellBackground;
+        // Highlight all visible column headers
+        for (let col = startCol; col <= endCol; col++) {
+            let x = dynamicHeaderWidth;
+            for (let c = 0; c < col; c++)
+                x += this.columnWidths[c];
+            let drawX = x - scrollX;
+            let cellWidth = this.columnWidths[col] || this.options.defaultColWidth;
+            // Only draw if the column header is visible
+            if (drawX + cellWidth > dynamicHeaderWidth && drawX < viewport.width) {
+                this.ctx.fillRect(Math.max(drawX, dynamicHeaderWidth), 0, Math.min(cellWidth, viewport.width - Math.max(drawX, dynamicHeaderWidth)), this.options.headerHeight);
+                // Draw the bottom border of the column header
+                this.ctx.beginPath();
+                this.ctx.strokeStyle = COLORS.selectedCellOutline;
+                this.ctx.lineWidth = CONFIG.selectedLineWidth;
+                this.ctx.moveTo(drawX, this.options.headerHeight);
+                this.ctx.lineTo(drawX + cellWidth, this.options.headerHeight);
+                this.ctx.stroke();
+            }
+        }
+        this.ctx.restore();
+    }
+    /**
+     * Draws the column selection rectangle on the canvas.
+     * This method highlights the selected columns based on the current selection.
+     * It draws a rectangle around the selected columns and highlights the row and column headers.
+     * @param {Viewport} viewPort - The current viewport dimensions and scroll position.
+     * @returns {void}
+     */
+    drawColumnSelection(viewPort) {
+        const selected = this.grid.selection;
+        if (!selected || selected.type !== "col") {
+            return; // Only handle column selections
+        }
+        const { startCol, endCol, originRow, originCol } = selected;
+        const { scrollX, scrollY } = viewPort;
+        const headerHeight = this.options.headerHeight;
+        const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewPort);
+        const { startRow, endRow } = this.getvisibleRange(viewPort);
+        const fromCol = Math.min(startCol, endCol);
+        const toCol = Math.max(startCol, endCol);
+        this.ctx.save();
+        // Create clipping region for the content area (excluding headers)
+        this.ctx.beginPath();
+        this.ctx.rect(dynamicHeaderWidth, headerHeight, viewPort.width - dynamicHeaderWidth, viewPort.height - headerHeight);
+        this.ctx.clip();
+        let outerX = Number.MAX_SAFE_INTEGER;
+        let outerX2 = 0;
+        // Check if the origin row is in the visible range
+        const originRowVisible = originRow >= startRow && originRow <= endRow;
+        // Loop through selected columns and visible rows
+        for (let col = fromCol; col <= toCol; col++) {
+            let x = dynamicHeaderWidth;
+            for (let c = 0; c < col; c++)
+                x += this.columnWidths[c];
+            let drawX = x - scrollX;
+            let colWidth = this.columnWidths[col] || this.options.defaultColWidth;
+            // Skip off-screen columns
+            if (drawX + colWidth <= dynamicHeaderWidth || drawX >= viewPort.width) {
+                continue;
+            }
+            // Loop through all visible rows for this column
+            for (let row = startRow; row <= endRow; row++) {
+                let y = headerHeight;
+                for (let r = 0; r < row; r++)
+                    y += this.rowHeights[r];
+                let drawY = y - scrollY;
+                let cellHeight = this.rowHeights[row] || this.options.defaultRowHeight;
+                // Skip off-screen cells
+                if (drawY + cellHeight <= headerHeight || drawY >= viewPort.height) {
+                    continue;
+                }
+                // Use the same origin logic as cell range selection
+                // The origin cell is only white if it's the origin row AND origin column AND visible
+                const isOrigin = row === originRow && col === originCol && originRowVisible;
+                if (!isOrigin) {
+                    this.ctx.fillStyle = COLORS.selectedCellOutline;
+                    this.ctx.globalAlpha = 0.2;
+                    this.ctx.fillRect(drawX, drawY, colWidth, cellHeight);
+                }
+            }
+            // Track outer bounding box
+            outerX = Math.min(outerX, drawX);
+            outerX2 = Math.max(outerX2, drawX + colWidth);
+        }
+        // Draw border around the visible selection area only if there are visible columns
+        if (outerX !== Number.MAX_SAFE_INTEGER && outerX2 > outerX) {
+            this.ctx.strokeStyle = COLORS.selectedCellOutline;
+            this.ctx.lineWidth = CONFIG.selectedLineWidth;
+            this.ctx.globalAlpha = 1;
+            const contentHeight = viewPort.height - headerHeight;
+            const height = outerX2 - outerX;
+            this.ctx.strokeRect(outerX, headerHeight, height, contentHeight);
+        }
+        this.ctx.restore();
+        // Draw row and column header highlights
+        this.drawColumnHeaderHighlights(fromCol, toCol, viewPort);
+        this.drawRowHeaderHighlightsForColumnSelection(viewPort);
+    }
+    /**
+     * Draws highlights for the column headers based on the selected column range.
+     * Highlights the column headers for the selected columns.
+     * @param {number} startCol - The starting column index of the selection.
+     * @param {number} endCol - The ending column index of the selection.
+     * @param {Viewport} viewport - The current viewport dimensions and scroll position.
+     * @returns {void}
+     */
+    drawColumnHeaderHighlights(startCol, endCol, viewport) {
+        const { headerHeight } = this.options;
+        const { scrollX } = viewport;
+        const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewport);
+        const fromCol = Math.min(startCol, endCol);
+        const toCol = Math.max(startCol, endCol);
+        this.ctx.save();
+        this.ctx.fillStyle = COLORS.selectedCellBackground;
+        for (let col = fromCol; col <= toCol; col++) {
+            let x = dynamicHeaderWidth;
+            for (let c = 0; c < col; c++)
+                x += this.columnWidths[c];
+            let drawX = x - scrollX;
+            let colWidth = this.columnWidths[col];
+            // Only draw header highlight if the column is visible
+            if (drawX + colWidth >= dynamicHeaderWidth && drawX <= viewport.width) {
+                this.ctx.fillRect(drawX, 0, colWidth, headerHeight);
+                // Draw the bottom border of the column header
+                this.ctx.beginPath();
+                this.ctx.strokeStyle = COLORS.selectedCellOutline;
+                this.ctx.lineWidth = CONFIG.selectedLineWidth;
+                this.ctx.moveTo(drawX, headerHeight);
+                this.ctx.lineTo(drawX + colWidth, headerHeight);
+                this.ctx.stroke();
+            }
+        }
+        this.ctx.restore();
+    }
+    /**
+     * Draws highlights for the row headers based on the selected column range.
+     * Highlights the row headers for the selected columns.
+     * @param {Viewport} viewport - The current viewport dimensions and scroll position.
+     * @returns {void}
+     */
+    drawRowHeaderHighlightsForColumnSelection(viewport) {
+        const { scrollY } = viewport;
+        const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewport);
+        const { startRow, endRow } = this.getvisibleRange(viewport);
+        this.ctx.save();
+        this.ctx.fillStyle = COLORS.selectedCellBackground;
+        // Highlight all visible row headers
+        for (let row = startRow; row <= endRow; row++) {
+            let y = this.options.headerHeight;
+            for (let r = 0; r < row; r++)
+                y += this.rowHeights[r];
+            let drawY = y - scrollY;
+            let cellHeight = this.rowHeights[row] || this.options.defaultRowHeight;
+            // Only draw if the row header is visible
+            if (drawY + cellHeight > this.options.headerHeight && drawY < viewport.height) {
+                this.ctx.fillRect(0, drawY, dynamicHeaderWidth, cellHeight);
+                // Draw the right border of the row header
+                this.ctx.beginPath();
+                this.ctx.strokeStyle = COLORS.selectedCellOutline;
+                this.ctx.lineWidth = CONFIG.selectedLineWidth;
+                this.ctx.moveTo(dynamicHeaderWidth, drawY);
+                this.ctx.lineTo(dynamicHeaderWidth, drawY + cellHeight);
+                this.ctx.stroke();
+            }
+        }
+        this.ctx.restore();
     }
 }
