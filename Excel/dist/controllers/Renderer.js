@@ -36,6 +36,20 @@ export class Renderer {
         // Draw row and column selections
         this.drawRowSelection(viewPort);
         this.drawColumnSelection(viewPort);
+        // Ensure the top-left corner is always clean
+        this.ensureCleanTopLeftCorner(viewPort);
+    }
+    /**
+     * Ensures the top-left corner cell is always clean and properly styled
+     * This prevents any selection highlighting from bleeding into this area.
+     * @param {Viewport} viewPort - The current viewport dimensions and scroll position.
+     * @returns {void}
+     */
+    ensureCleanTopLeftCorner(viewPort) {
+        const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewPort);
+        // Always redraw the top-left corner with the correct background
+        this.ctx.fillStyle = COLORS.headerBackground;
+        this.ctx.fillRect(0, 0, dynamicHeaderWidth, this.options.headerHeight);
     }
     /**
      * Calculates the dynamic Row header width based on the maximum visible row number.
@@ -305,10 +319,24 @@ export class Renderer {
         // Adjust for scroll position
         const drawX = x - scrollX;
         const drawY = y - scrollY;
-        // Draw the selection rectangle on Headers (Row, Column)
+        // Draw the selection rectangle on Headers (Row, Column) with proper clipping
         this.ctx.fillStyle = COLORS.selectedCellBackground;
-        this.ctx.fillRect(drawX, 0, cellWidth, this.options.headerHeight);
-        this.ctx.fillRect(0, drawY, dynamicHeaderWidth, cellHeight);
+        // Draw column header highlight only if it doesn't overlap top-left corner
+        if (drawX >= dynamicHeaderWidth || drawX + cellWidth > dynamicHeaderWidth) {
+            const headerStartX = Math.max(drawX, dynamicHeaderWidth);
+            const headerWidth = Math.min(drawX + cellWidth, viewPort.width) - headerStartX;
+            if (headerWidth > 0) {
+                this.ctx.fillRect(headerStartX, 0, headerWidth, this.options.headerHeight);
+            }
+        }
+        // Draw row header highlight only if it doesn't overlap top-left corner
+        if (drawY >= this.options.headerHeight || drawY + cellHeight > this.options.headerHeight) {
+            const headerStartY = Math.max(drawY, this.options.headerHeight);
+            const headerHeight = Math.min(drawY + cellHeight, viewPort.height) - headerStartY;
+            if (headerHeight > 0) {
+                this.ctx.fillRect(0, headerStartY, dynamicHeaderWidth, headerHeight);
+            }
+        }
         // Only draw if the selection is within the visible viewport
         if (drawX + cellWidth > dynamicHeaderWidth &&
             drawY + cellHeight > this.options.headerHeight &&
@@ -339,20 +367,30 @@ export class Renderer {
             const headerY = drawY;
             const headerHeight = cellHeight;
             const headerX = dynamicHeaderWidth;
-            this.ctx.beginPath();
-            this.ctx.strokeStyle = COLORS.selectedCellOutline;
-            this.ctx.lineWidth = CONFIG.selectedLineWidth;
-            this.ctx.moveTo(headerX, headerY);
-            this.ctx.lineTo(headerX, headerY + headerHeight);
-            this.ctx.stroke();
+            // Only draw row header border if it doesn't overlap top-left corner
+            if (headerY + headerHeight > this.options.headerHeight) {
+                this.ctx.beginPath();
+                this.ctx.strokeStyle = COLORS.selectedCellOutline;
+                this.ctx.lineWidth = CONFIG.selectedLineWidth;
+                const lineStartY = Math.max(headerY, this.options.headerHeight);
+                const lineEndY = Math.min(headerY + headerHeight, viewPort.height);
+                this.ctx.moveTo(headerX, lineStartY);
+                this.ctx.lineTo(headerX, lineEndY);
+                this.ctx.stroke();
+            }
             // Draw column header horizontal highlight (bottom edge of column header)
             const headerX2 = drawX;
             const headerWidth = cellWidth;
             const headerY2 = this.options.headerHeight;
-            this.ctx.beginPath();
-            this.ctx.moveTo(headerX2, headerY2);
-            this.ctx.lineTo(headerX2 + headerWidth, headerY2);
-            this.ctx.stroke();
+            // Only draw column header border if it doesn't overlap top-left corner
+            if (headerX2 + headerWidth > dynamicHeaderWidth) {
+                this.ctx.beginPath();
+                const lineStartX = Math.max(headerX2, dynamicHeaderWidth);
+                const lineEndX = Math.min(headerX2 + headerWidth, viewPort.width);
+                this.ctx.moveTo(lineStartX, headerY2);
+                this.ctx.lineTo(lineEndX, headerY2);
+                this.ctx.stroke();
+            }
         }
     }
     /**
@@ -448,12 +486,17 @@ export class Renderer {
                 x += this.columnWidths[c];
             let drawX = x - scrollX;
             let cellWidth = this.columnWidths[col];
-            this.ctx.beginPath();
-            this.ctx.strokeStyle = COLORS.selectedCellOutline;
-            this.ctx.lineWidth = CONFIG.selectedLineWidth;
-            this.ctx.moveTo(drawX, headerHeight);
-            this.ctx.lineTo(drawX + cellWidth, headerHeight);
-            this.ctx.stroke();
+            // Only draw border if it doesn't overlap top-left corner
+            if (drawX + cellWidth > dynamicHeaderWidth) {
+                this.ctx.beginPath();
+                this.ctx.strokeStyle = COLORS.selectedCellOutline;
+                this.ctx.lineWidth = CONFIG.selectedLineWidth;
+                const lineStartX = Math.max(drawX, dynamicHeaderWidth);
+                const lineEndX = Math.min(drawX + cellWidth, viewport.width);
+                this.ctx.moveTo(lineStartX, headerHeight);
+                this.ctx.lineTo(lineEndX, headerHeight);
+                this.ctx.stroke();
+            }
         }
         // Highlight row headers (right border)
         for (let row = startRow; row <= endRow; row++) {
@@ -462,12 +505,17 @@ export class Renderer {
                 y += this.rowHeights[r];
             let drawY = y - scrollY;
             let cellHeight = this.rowHeights[row];
-            this.ctx.beginPath();
-            this.ctx.strokeStyle = COLORS.selectedCellOutline;
-            this.ctx.lineWidth = CONFIG.selectedLineWidth;
-            this.ctx.moveTo(dynamicHeaderWidth, drawY);
-            this.ctx.lineTo(dynamicHeaderWidth, drawY + cellHeight);
-            this.ctx.stroke();
+            // Only draw border if it doesn't overlap top-left corner
+            if (drawY + cellHeight > headerHeight) {
+                this.ctx.beginPath();
+                this.ctx.strokeStyle = COLORS.selectedCellOutline;
+                this.ctx.lineWidth = CONFIG.selectedLineWidth;
+                const lineStartY = Math.max(drawY, headerHeight);
+                const lineEndY = Math.min(drawY + cellHeight, viewport.height);
+                this.ctx.moveTo(dynamicHeaderWidth, lineStartY);
+                this.ctx.lineTo(dynamicHeaderWidth, lineEndY);
+                this.ctx.stroke();
+            }
         }
         this.ctx.fillStyle = COLORS.selectedCellBackground;
         // Fill the Col headers for selected columns
@@ -598,14 +646,30 @@ export class Renderer {
             if (drawY + rowHeight >= headerHeight && drawY <= viewport.height) {
                 this.ctx.fillRect(0, drawY, dynamicHeaderWidth, rowHeight);
             }
-            // Draw the right border of the row header
-            this.ctx.beginPath();
-            const alignX = Math.floor(dynamicHeaderWidth) + 0.5; // Align to pixel grid
-            this.ctx.lineWidth = CONFIG.selectedLineWidth;
-            this.ctx.strokeStyle = COLORS.selectedCellOutline;
-            this.ctx.moveTo(alignX, drawY);
-            this.ctx.lineTo(alignX, drawY + rowHeight);
-            this.ctx.stroke();
+        }
+        this.ctx.restore();
+        // Draw the right border of the row headers outside the clipped region
+        this.ctx.save();
+        this.ctx.lineWidth = CONFIG.selectedLineWidth;
+        this.ctx.strokeStyle = COLORS.selectedCellOutline;
+        for (let row = fromRow; row <= toRow; row++) {
+            let y = headerHeight;
+            for (let r = 0; r < row; r++)
+                y += this.rowHeights[r];
+            let drawY = y - scrollY;
+            let rowHeight = this.rowHeights[row];
+            // Only draw border if the row is visible and doesn't overlap top-left corner
+            if (drawY + rowHeight >= headerHeight && drawY <= viewport.height) {
+                this.ctx.beginPath();
+                // For 2px lines, adjust alignment differently
+                const alignX = Math.floor(dynamicHeaderWidth);
+                // Ensure the line doesn't extend into the top-left corner
+                const lineStartY = Math.max(drawY, headerHeight);
+                const lineEndY = Math.min(drawY + rowHeight, viewport.height);
+                this.ctx.moveTo(alignX, lineStartY);
+                this.ctx.lineTo(alignX, lineEndY);
+                this.ctx.stroke();
+            }
         }
         this.ctx.restore();
     }
@@ -633,13 +697,29 @@ export class Renderer {
             // Only draw if the column header is visible
             if (drawX + cellWidth > dynamicHeaderWidth && drawX < viewport.width) {
                 this.ctx.fillRect(Math.max(drawX, dynamicHeaderWidth), 0, Math.min(cellWidth, viewport.width - Math.max(drawX, dynamicHeaderWidth)), this.options.headerHeight);
-                // Draw the bottom border of the column header
+            }
+        }
+        this.ctx.restore();
+        // Draw the bottom border of the column headers outside the clipped region
+        this.ctx.save();
+        this.ctx.lineWidth = CONFIG.selectedLineWidth;
+        this.ctx.strokeStyle = COLORS.selectedCellOutline;
+        for (let col = startCol; col <= endCol; col++) {
+            let x = dynamicHeaderWidth;
+            for (let c = 0; c < col; c++)
+                x += this.columnWidths[c];
+            let drawX = x - scrollX;
+            let cellWidth = this.columnWidths[col] || this.options.defaultColWidth;
+            // Only draw if the column header is visible and doesn't overlap top-left corner
+            if (drawX + cellWidth > dynamicHeaderWidth && drawX < viewport.width) {
                 this.ctx.beginPath();
-                const alignY = Math.floor(this.options.headerHeight) + 0.5; // Align to pixel grid
-                this.ctx.lineWidth = CONFIG.selectedLineWidth;
-                this.ctx.strokeStyle = COLORS.selectedCellOutline;
-                this.ctx.moveTo(drawX, alignY);
-                this.ctx.lineTo(drawX + cellWidth, alignY);
+                // For 2px lines, adjust alignment differently
+                const alignY = Math.floor(this.options.headerHeight);
+                // Ensure the line doesn't extend into the top-left corner
+                const lineStartX = Math.max(drawX, dynamicHeaderWidth);
+                const lineEndX = Math.min(drawX + cellWidth, viewport.width);
+                this.ctx.moveTo(lineStartX, alignY);
+                this.ctx.lineTo(lineEndX, alignY);
                 this.ctx.stroke();
             }
         }
@@ -749,12 +829,29 @@ export class Renderer {
             // Only draw header highlight if the column is visible
             if (drawX + colWidth >= dynamicHeaderWidth && drawX <= viewport.width) {
                 this.ctx.fillRect(drawX, 0, colWidth, headerHeight);
-                // Draw the bottom border of the column header
+            }
+        }
+        this.ctx.restore();
+        // Draw the bottom border of the column headers outside the clipped region
+        this.ctx.save();
+        this.ctx.lineWidth = CONFIG.selectedLineWidth;
+        this.ctx.strokeStyle = COLORS.selectedCellOutline;
+        for (let col = fromCol; col <= toCol; col++) {
+            let x = dynamicHeaderWidth;
+            for (let c = 0; c < col; c++)
+                x += this.columnWidths[c];
+            let drawX = x - scrollX;
+            let colWidth = this.columnWidths[col];
+            // Only draw border if the column is visible and doesn't overlap top-left corner
+            if (drawX + colWidth >= dynamicHeaderWidth && drawX <= viewport.width) {
                 this.ctx.beginPath();
-                this.ctx.strokeStyle = COLORS.selectedCellOutline;
-                this.ctx.lineWidth = CONFIG.selectedLineWidth;
-                this.ctx.moveTo(drawX, headerHeight);
-                this.ctx.lineTo(drawX + colWidth, headerHeight);
+                // For 2px lines, adjust alignment differently
+                const alignY = Math.floor(headerHeight);
+                // Ensure the line doesn't extend into the top-left corner
+                const lineStartX = Math.max(drawX, dynamicHeaderWidth);
+                const lineEndX = Math.min(drawX + colWidth, viewport.width);
+                this.ctx.moveTo(lineStartX, alignY);
+                this.ctx.lineTo(lineEndX, alignY);
                 this.ctx.stroke();
             }
         }
@@ -784,12 +881,29 @@ export class Renderer {
             // Only draw if the row header is visible
             if (drawY + cellHeight > this.options.headerHeight && drawY < viewport.height) {
                 this.ctx.fillRect(0, drawY, dynamicHeaderWidth, cellHeight);
-                // Draw the right border of the row header
+            }
+        }
+        this.ctx.restore();
+        // Draw the right border of the row headers outside the clipped region
+        this.ctx.save();
+        this.ctx.lineWidth = CONFIG.selectedLineWidth;
+        this.ctx.strokeStyle = COLORS.selectedCellOutline;
+        for (let row = startRow; row <= endRow; row++) {
+            let y = this.options.headerHeight;
+            for (let r = 0; r < row; r++)
+                y += this.rowHeights[r];
+            let drawY = y - scrollY;
+            let cellHeight = this.rowHeights[row] || this.options.defaultRowHeight;
+            // Only draw if the row header is visible and doesn't overlap top-left corner
+            if (drawY + cellHeight > this.options.headerHeight && drawY < viewport.height) {
                 this.ctx.beginPath();
-                this.ctx.strokeStyle = COLORS.selectedCellOutline;
-                this.ctx.lineWidth = CONFIG.selectedLineWidth;
-                this.ctx.moveTo(dynamicHeaderWidth, drawY);
-                this.ctx.lineTo(dynamicHeaderWidth, drawY + cellHeight);
+                // For 2px lines, adjust alignment differently
+                const alignX = Math.floor(dynamicHeaderWidth);
+                // Ensure the line doesn't extend into the top-left corner
+                const lineStartY = Math.max(drawY, this.options.headerHeight);
+                const lineEndY = Math.min(drawY + cellHeight, viewport.height);
+                this.ctx.moveTo(alignX, lineStartY);
+                this.ctx.lineTo(alignX, lineEndY);
                 this.ctx.stroke();
             }
         }
