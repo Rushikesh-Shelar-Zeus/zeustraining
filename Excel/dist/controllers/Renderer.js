@@ -85,10 +85,38 @@ export class Renderer {
             const y = row * this.options.defaultRowHeight - viewPort.scrollY + this.options.headerHeight;
             this.ctx.beginPath();
             // Start after row headers
-            this.ctx.moveTo(dynamicHeaderWidth + 0.5, y);
-            this.ctx.lineTo(viewPort.width + 0.5, y);
+            this.ctx.moveTo(dynamicHeaderWidth, y + 0.5);
+            this.ctx.lineTo(viewPort.width, y + 0.5);
             this.ctx.stroke();
         }
+    }
+    /**
+     * Clips the drawing context to only the row header area,
+     * excluding the top-left corner cell.
+    */
+    clipRowHeadersOnly(ctx, viewport) {
+        const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewport);
+        ctx.beginPath();
+        ctx.rect(0, this.options.headerHeight, // Start below column header
+        dynamicHeaderWidth, viewport.height - this.options.headerHeight);
+        ctx.clip();
+    }
+    /**
+     * Clips the drawing context to only the column header area,
+     * excluding the top-left corner cell.
+     */
+    clipColumnHeadersOnly(ctx, viewport) {
+        const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewport);
+        ctx.beginPath();
+        ctx.rect(dynamicHeaderWidth, 0, viewport.width - dynamicHeaderWidth, this.options.headerHeight);
+        ctx.clip();
+    }
+    clipOutHeaders(ctx, viewport) {
+        const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewport);
+        // Could be useful when clipping to whole canvas but excluding (0,0)
+        ctx.beginPath();
+        ctx.rect(dynamicHeaderWidth, this.options.headerHeight, viewport.width - dynamicHeaderWidth, viewport.height - this.options.headerHeight);
+        ctx.clip();
     }
     /**
      * Renders the headers of the grid including column and row headers.
@@ -153,18 +181,10 @@ export class Renderer {
         for (let row = startRow; row <= endRow + 1; row++) {
             const y = row * this.options.defaultRowHeight - viewPort.scrollY + this.options.headerHeight;
             this.ctx.beginPath();
-            this.ctx.moveTo(0 + 0.5, y);
-            this.ctx.lineTo(dynamicHeaderWidth + 0.5, y);
+            this.ctx.moveTo(0, y + 0.5);
+            this.ctx.lineTo(dynamicHeaderWidth, y + 0.5);
             this.ctx.stroke();
         }
-        // Draw the border around the top-left corner (intersection of headers)
-        this.ctx.beginPath();
-        this.ctx.moveTo(0, 0);
-        this.ctx.lineTo(dynamicHeaderWidth, 0);
-        this.ctx.lineTo(dynamicHeaderWidth, this.options.headerHeight);
-        this.ctx.lineTo(0, this.options.headerHeight);
-        this.ctx.lineTo(0, 0);
-        this.ctx.stroke();
         // Draw the vertical line separating row headers from column headers
         this.ctx.beginPath();
         this.ctx.moveTo(dynamicHeaderWidth, 0);
@@ -297,9 +317,7 @@ export class Renderer {
             // Save the current canvas state
             this.ctx.save();
             // Create a clipping region to prevent drawing over headers
-            this.ctx.beginPath();
-            this.ctx.rect(dynamicHeaderWidth, this.options.headerHeight, viewPort.width - dynamicHeaderWidth, viewPort.height - this.options.headerHeight);
-            this.ctx.clip();
+            this.clipOutHeaders(this.ctx, viewPort);
             // Calculate the actual drawing area (clipped to not overlap headers)
             const clippedX = Math.max(drawX, dynamicHeaderWidth);
             const clippedY = Math.max(drawY, this.options.headerHeight);
@@ -361,9 +379,7 @@ export class Renderer {
         // Save canvas state
         this.ctx.save();
         // Clip to content area (not headers)
-        this.ctx.beginPath();
-        this.ctx.rect(dynamicHeaderWidth, headerHeight, viewport.width - dynamicHeaderWidth, viewport.height - headerHeight);
-        this.ctx.clip();
+        this.clipOutHeaders(this.ctx, viewport);
         let outerX = Number.MAX_SAFE_INTEGER;
         let outerY = Number.MAX_SAFE_INTEGER;
         let outerX2 = 0;
@@ -459,14 +475,22 @@ export class Renderer {
             let x = this.columnWidths.slice(0, col).reduce((a, b) => a + b, 0) + dynamicHeaderWidth;
             let drawX = x - scrollX;
             let cellWidth = this.columnWidths[col];
+            this.ctx.save();
+            // Clip to the header area only
+            this.clipColumnHeadersOnly(this.ctx, viewport);
             this.ctx.fillRect(drawX, 0, cellWidth, this.options.headerHeight); // top header row
+            this.ctx.restore();
         }
         // Fill row headers for selected rows
         for (let row = startRow; row <= endRow; row++) {
             let y = this.rowHeights.slice(0, row).reduce((a, b) => a + b, 0) + this.options.headerHeight;
             let drawY = y - scrollY;
             let cellHeight = this.rowHeights[row];
+            this.ctx.save();
+            // Clip to the header area only
+            this.clipRowHeadersOnly(this.ctx, viewport);
             this.ctx.fillRect(0, drawY, dynamicHeaderWidth, cellHeight); // left header column
+            this.ctx.restore();
         }
     }
     /**
@@ -561,6 +585,8 @@ export class Renderer {
         const fromRow = Math.min(startRow, endRow);
         const toRow = Math.max(startRow, endRow);
         this.ctx.save();
+        // Clip to content area (excluding headers)
+        this.clipRowHeadersOnly(this.ctx, viewport);
         this.ctx.fillStyle = COLORS.selectedCellBackground;
         for (let row = fromRow; row <= toRow; row++) {
             let y = headerHeight;
@@ -574,10 +600,11 @@ export class Renderer {
             }
             // Draw the right border of the row header
             this.ctx.beginPath();
-            this.ctx.strokeStyle = COLORS.selectedCellOutline;
+            const alignX = Math.floor(dynamicHeaderWidth) + 0.5; // Align to pixel grid
             this.ctx.lineWidth = CONFIG.selectedLineWidth;
-            this.ctx.moveTo(dynamicHeaderWidth, drawY);
-            this.ctx.lineTo(dynamicHeaderWidth, drawY + rowHeight);
+            this.ctx.strokeStyle = COLORS.selectedCellOutline;
+            this.ctx.moveTo(alignX, drawY);
+            this.ctx.lineTo(alignX, drawY + rowHeight);
             this.ctx.stroke();
         }
         this.ctx.restore();
@@ -593,6 +620,8 @@ export class Renderer {
         const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewport);
         const { startCol, endCol } = this.getvisibleRange(viewport);
         this.ctx.save();
+        // Clip out the top-left corner
+        this.clipColumnHeadersOnly(this.ctx, viewport);
         this.ctx.fillStyle = COLORS.selectedCellBackground;
         // Highlight all visible column headers
         for (let col = startCol; col <= endCol; col++) {
@@ -606,10 +635,11 @@ export class Renderer {
                 this.ctx.fillRect(Math.max(drawX, dynamicHeaderWidth), 0, Math.min(cellWidth, viewport.width - Math.max(drawX, dynamicHeaderWidth)), this.options.headerHeight);
                 // Draw the bottom border of the column header
                 this.ctx.beginPath();
-                this.ctx.strokeStyle = COLORS.selectedCellOutline;
+                const alignY = Math.floor(this.options.headerHeight) + 0.5; // Align to pixel grid
                 this.ctx.lineWidth = CONFIG.selectedLineWidth;
-                this.ctx.moveTo(drawX, this.options.headerHeight);
-                this.ctx.lineTo(drawX + cellWidth, this.options.headerHeight);
+                this.ctx.strokeStyle = COLORS.selectedCellOutline;
+                this.ctx.moveTo(drawX, alignY);
+                this.ctx.lineTo(drawX + cellWidth, alignY);
                 this.ctx.stroke();
             }
         }
@@ -707,6 +737,8 @@ export class Renderer {
         const fromCol = Math.min(startCol, endCol);
         const toCol = Math.max(startCol, endCol);
         this.ctx.save();
+        // Clip out the top-left corner
+        this.clipColumnHeadersOnly(this.ctx, viewport);
         this.ctx.fillStyle = COLORS.selectedCellBackground;
         for (let col = fromCol; col <= toCol; col++) {
             let x = dynamicHeaderWidth;
@@ -739,6 +771,8 @@ export class Renderer {
         const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewport);
         const { startRow, endRow } = this.getvisibleRange(viewport);
         this.ctx.save();
+        // Clip out the top-left corner
+        this.clipRowHeadersOnly(this.ctx, viewport);
         this.ctx.fillStyle = COLORS.selectedCellBackground;
         // Highlight all visible row headers
         for (let row = startRow; row <= endRow; row++) {

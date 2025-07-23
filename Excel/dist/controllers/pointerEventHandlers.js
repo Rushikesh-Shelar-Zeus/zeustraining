@@ -17,6 +17,10 @@ export class PointerEventManager {
         this.hitTestManager = hitTestManager;
         /** @type {boolean} - Indicates if the pointer is currently dragging */
         this.isDragging = false;
+        /** @type {boolean} - Whether dragging started in the header area */
+        this.isInHeaderDrag = false;
+        /** @type {"cell" | "row" | "col" | null} - Dragging mode */
+        this.dragMode = null;
         /** @type {number} - Last pointer X coordinate */
         this.lastPointerX = 0;
         /** @type {number} - Last pointer Y coordinate */
@@ -29,6 +33,9 @@ export class PointerEventManager {
          * @param {PointerEvent} e - The pointer down event.
          */
         this.onPointerDown = (e) => {
+            // Ignore clicks on the scrollbar
+            if (this.isScrollbarClick(e, this.scrollContainer))
+                return;
             e.preventDefault();
             this.isDragging = true;
             // Get the canvas coordinates from the pointer event
@@ -37,8 +44,23 @@ export class PointerEventManager {
             const y = e.clientY - rect.top;
             //Check for the Hit Test
             const hit = this.hitTestManager.hitTest(x, y);
+            // Detect selection type for scroll direction
+            if (hit?.type === "row") {
+                this.dragMode = "row";
+            }
+            else if (hit?.type === "col") {
+                this.dragMode = "col";
+            }
+            else if (hit?.type === "cell") {
+                this.dragMode = "cell";
+            }
+            else {
+                this.dragMode = null;
+            }
             // Delegate the hit test result to the selection manager
             if (hit) {
+                // If the hit test is in the header area, set the dragging state
+                this.isInHeaderDrag = hit.type === "col" || hit.type === "row";
                 this.selectionManager.handlePointerDown(hit);
             }
             else {
@@ -51,6 +73,9 @@ export class PointerEventManager {
          * @param {PointerEvent} e - The pointer move event.
          */
         this.onPointerMove = (e) => {
+            // Ignore clicks on the scrollbar
+            if (this.isScrollbarClick(e, this.scrollContainer))
+                return;
             e.preventDefault();
             if (!this.isDragging)
                 return;
@@ -79,10 +104,15 @@ export class PointerEventManager {
          * @param {PointerEvent} e - The pointer up event.
          */
         this.onPointerUp = (e) => {
+            // Ignore clicks on the scrollbar
+            if (this.isScrollbarClick(e, this.scrollContainer))
+                return;
             e.preventDefault();
             if (!this.isDragging)
                 return;
             this.isDragging = false;
+            this.isInHeaderDrag = false;
+            this.dragMode = null;
             // Get the canvas coordinates from the pointer event
             const { x, y } = this.getCanvasCoords(e);
             // Check for the Hit Test
@@ -125,6 +155,7 @@ export class PointerEventManager {
     startAutoScrollLoop() {
         if (this.autoScrollFrameId !== null)
             return;
+        // Define the scroll speed and edge threshold
         const scrollSpeed = 20;
         const edgeThreshold = 30;
         const loop = () => {
@@ -134,21 +165,25 @@ export class PointerEventManager {
             }
             const rect = this.scrollContainer.getBoundingClientRect();
             let scrolled = false;
-            if (this.lastPointerX - rect.left < edgeThreshold) {
-                this.scrollContainer.scrollLeft -= scrollSpeed;
-                scrolled = true;
+            if (this.dragMode !== "row") {
+                if (this.lastPointerX - rect.left < edgeThreshold) {
+                    this.scrollContainer.scrollLeft -= scrollSpeed;
+                    scrolled = true;
+                }
+                else if (rect.right - this.lastPointerX < edgeThreshold) {
+                    this.scrollContainer.scrollLeft += scrollSpeed;
+                    scrolled = true;
+                }
             }
-            else if (rect.right - this.lastPointerX < edgeThreshold) {
-                this.scrollContainer.scrollLeft += scrollSpeed;
-                scrolled = true;
-            }
-            if (this.lastPointerY - rect.top < edgeThreshold) {
-                this.scrollContainer.scrollTop -= scrollSpeed;
-                scrolled = true;
-            }
-            else if (rect.bottom - this.lastPointerY < edgeThreshold) {
-                this.scrollContainer.scrollTop += scrollSpeed;
-                scrolled = true;
+            if (this.dragMode !== "col") {
+                if (this.lastPointerY - rect.top < edgeThreshold) {
+                    this.scrollContainer.scrollTop -= scrollSpeed;
+                    scrolled = true;
+                }
+                else if (rect.bottom - this.lastPointerY < edgeThreshold) {
+                    this.scrollContainer.scrollTop += scrollSpeed;
+                    scrolled = true;
+                }
             }
             if (scrolled) {
                 const { x, y } = this.getCanvasCoords({
@@ -162,5 +197,11 @@ export class PointerEventManager {
             this.autoScrollFrameId = requestAnimationFrame(loop);
         };
         this.autoScrollFrameId = requestAnimationFrame(loop);
+    }
+    isScrollbarClick(e, container) {
+        const bounds = container.getBoundingClientRect();
+        const isVerticalScrollbar = e.clientX > bounds.left + container.clientWidth;
+        const isHorizontalScrollbar = e.clientY > bounds.top + container.clientHeight;
+        return isVerticalScrollbar || isHorizontalScrollbar;
     }
 }

@@ -18,8 +18,8 @@ export class TopLeftCellHitTestHandler {
         if (x < headerWidth && y < headerHeight) {
             return {
                 type: "cell",
-                row: -1, // Special case for top-left cell
-                col: -1 // Special case for top-left cell
+                row: -1,
+                col: -1
             };
         }
         // Not in the top-left corner
