@@ -162,6 +162,8 @@ export class RowSelectionHandler {
     constructor(grid, onSelectionChange) {
         this.grid = grid;
         this.onSelectionChange = onSelectionChange;
+        /** @type {boolean} - Indicates if the render is scheduled */
+        this.isRenderScheduled = false;
         /** @type {number} - The starting row for the selection */
         this.startRow = -1;
         /** @type {number} - Last row selected */
@@ -217,7 +219,7 @@ export class RowSelectionHandler {
             originCol: 0
         };
         // Trigger the selection change callback
-        this.onSelectionChange();
+        this.scheduleRender();
     }
     /**
      * Handles pointer up events for row selection.
@@ -227,6 +229,17 @@ export class RowSelectionHandler {
     onPointerUp() {
         // Reset the starting row for the selection
         this.startRow = -1;
+    }
+    scheduleRender() {
+        if (!this.isRenderScheduled) {
+            this.isRenderScheduled = true;
+            requestAnimationFrame(() => {
+                console.time("selectionRender");
+                this.onSelectionChange();
+                console.timeEnd("selectionRender");
+                this.isRenderScheduled = false;
+            });
+        }
     }
 }
 export class ColumnSelectionHandler {
@@ -238,6 +251,8 @@ export class ColumnSelectionHandler {
     constructor(grid, onSelectionChange) {
         this.grid = grid;
         this.onSelectionChange = onSelectionChange;
+        /** @type {boolean} - Indicates if the render is scheduled */
+        this.isRenderScheduled = false;
         /** @type {number} - The starting column for the selection */
         this.startCol = -1;
         /** @type {number} - Last column selected */
@@ -292,7 +307,7 @@ export class ColumnSelectionHandler {
             originCol: this.startCol
         };
         // Trigger the selection change callback
-        this.onSelectionChange();
+        this.scheduleRender();
     }
     /**
      * Handles pointer up events for column selection.
@@ -303,5 +318,16 @@ export class ColumnSelectionHandler {
     onPointerUp(hit) {
         // Reset the starting column for the selection
         this.startCol = -1;
+    }
+    scheduleRender() {
+        if (!this.isRenderScheduled) {
+            this.isRenderScheduled = true;
+            requestAnimationFrame(() => {
+                console.time("selectionRender");
+                this.onSelectionChange();
+                console.timeEnd("selectionRender");
+                this.isRenderScheduled = false;
+            });
+        }
     }
 }

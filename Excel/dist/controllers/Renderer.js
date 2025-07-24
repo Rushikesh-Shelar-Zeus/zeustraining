@@ -56,6 +56,10 @@ export class Renderer {
         // Ensure the top-left corner is always clean
         // this.ensureCleanTopLeftCorner(viewPort);
     }
+    /**
+     * Updates the cached column left positions if the dynamic header width has changed.
+     * @param {Viewport} viewport - The current viewport dimensions and scroll position.
+     */
     updateColLeftsIfNeeded(viewport) {
         const currentHeaderWidth = this.getDynamicHeaderWidth(viewport);
         if (this.lastHeaderWidth !== currentHeaderWidth) {
@@ -580,6 +584,8 @@ export class Renderer {
         const headerHeight = this.options.headerHeight;
         const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewPort);
         const { startCol, endCol } = this.getvisibleRange(viewPort);
+        // Update column lefts if needed (since it can change based on dynamic header width)
+        this.updateColLeftsIfNeeded(viewPort);
         const fromRow = Math.min(startRow, endRow);
         const toRow = Math.max(startRow, endRow);
         this.ctx.save();
@@ -599,8 +605,8 @@ export class Renderer {
             if (drawY + rowHeight <= headerHeight || drawY >= viewPort.height) {
                 continue;
             }
-            // Update column lefts if needed (since it can change based on dynamic header width)
-            this.updateColLeftsIfNeeded(viewPort);
+            this.ctx.fillStyle = COLORS.selectedCellOutline;
+            this.ctx.globalAlpha = 0.2;
             // Loop through all visible columns for this row
             for (let col = startCol; col <= endCol; col++) {
                 let drawX = this.colLefts[col] - scrollX;
@@ -612,8 +618,6 @@ export class Renderer {
                 // The origin cell is only white if it's the origin row AND origin column AND visible
                 const isOrigin = row === originRow && col === originCol && originColVisible;
                 if (!isOrigin) {
-                    this.ctx.fillStyle = COLORS.selectedCellOutline;
-                    this.ctx.globalAlpha = 0.2;
                     this.ctx.fillRect(drawX, drawY, cellWidth, rowHeight);
                 }
             }
@@ -694,8 +698,6 @@ export class Renderer {
         const { scrollX } = viewport;
         const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewport);
         const { startCol, endCol } = this.getvisibleRange(viewport);
-        // Update column lefts if needed (since it can change based on dynamic header width)
-        this.updateColLeftsIfNeeded(viewport);
         this.ctx.save();
         // Clip out the top-left corner
         this.clipColumnHeadersOnly(this.ctx, viewport);
@@ -817,8 +819,6 @@ export class Renderer {
         const { headerHeight } = this.options;
         const { scrollX } = viewport;
         const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewport);
-        // Update column lefts if needed (since it can change based on dynamic header width)
-        this.updateColLeftsIfNeeded(viewport);
         const fromCol = Math.min(startCol, endCol);
         const toCol = Math.max(startCol, endCol);
         this.ctx.save();

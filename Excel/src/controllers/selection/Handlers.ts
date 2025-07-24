@@ -186,6 +186,10 @@ export class CellRangeSelectionHandler implements SelectionHandler {
  * @implements {SelectionHandler}
  */
 export class RowSelectionHandler implements SelectionHandler {
+
+    /** @type {boolean} - Indicates if the render is scheduled */
+    private isRenderScheduled: boolean = false;
+
     /** @type {number} - The starting row for the selection */
     private startRow: number = -1;
 
@@ -259,7 +263,7 @@ export class RowSelectionHandler implements SelectionHandler {
         };
 
         // Trigger the selection change callback
-        this.onSelectionChange();
+        this.scheduleRender();
     }
 
     /**
@@ -271,9 +275,25 @@ export class RowSelectionHandler implements SelectionHandler {
         // Reset the starting row for the selection
         this.startRow = -1;
     }
+
+    private scheduleRender(): void {
+        if (!this.isRenderScheduled) {
+            this.isRenderScheduled = true;
+            requestAnimationFrame(() => {
+                console.time("selectionRender");
+                this.onSelectionChange();
+                console.timeEnd("selectionRender");
+                this.isRenderScheduled = false;
+            });
+        }
+    }
 }
 
 export class ColumnSelectionHandler implements SelectionHandler {
+
+    /** @type {boolean} - Indicates if the render is scheduled */
+    private isRenderScheduled: boolean = false;
+
     /** @type {number} - The starting column for the selection */
     private startCol: number = -1;
 
@@ -346,7 +366,7 @@ export class ColumnSelectionHandler implements SelectionHandler {
         };
 
         // Trigger the selection change callback
-        this.onSelectionChange();
+        this.scheduleRender();
     }
 
     /**
@@ -358,5 +378,17 @@ export class ColumnSelectionHandler implements SelectionHandler {
     onPointerUp(hit: HitTestResult): void {
         // Reset the starting column for the selection
         this.startCol = -1;
+    }
+
+    private scheduleRender(): void {
+        if (!this.isRenderScheduled) {
+            this.isRenderScheduled = true;
+            requestAnimationFrame(() => {
+                console.time("selectionRender");
+                this.onSelectionChange();
+                console.timeEnd("selectionRender");
+                this.isRenderScheduled = false;
+            });
+        }
     }
 }
