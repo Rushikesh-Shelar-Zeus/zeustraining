@@ -1,7 +1,7 @@
 import { Grid } from "../Grid.js";
 import { HitTestResult } from "../hittest/index.js";
 import { Renderer } from "../Renderer.js";
-import { CellRangeSelectionHandler, CellSelectionHandler, ColumnSelectionHandler, RowSelectionHandler } from "./Handlers.js";
+import { CellRangeSelectionHandler, CellSelectionHandler, ColumnSelectionHandler, RowSelectionHandler, SelectEverythingHandler } from "./Handlers.js";
 import { SelectionHandler } from "./index.js";
 
 /**
@@ -11,6 +11,7 @@ import { SelectionHandler } from "./index.js";
 export class SelectionManager {
     /** @type {Record<string, SelectionHandler>} */
     private handlersMap: {
+        all?: SelectionHandler;
         cell?: SelectionHandler;
         row?: SelectionHandler;
         col?: SelectionHandler;
@@ -29,6 +30,7 @@ export class SelectionManager {
     ) {
         // Initialize the handlers with the CellSelectionHandler
         this.handlersMap = {
+            all: new SelectEverythingHandler(grid, () => this.renderer.render(grid.viewport)),
             cell: new CellRangeSelectionHandler(grid, () => this.renderer.render(grid.viewport)),
             row: new RowSelectionHandler(grid, () => this.renderer.render(grid.viewport)),
             col: new ColumnSelectionHandler(grid, () => this.renderer.render(grid.viewport))

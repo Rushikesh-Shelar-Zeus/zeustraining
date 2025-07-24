@@ -46,8 +46,8 @@ export class PointerEventManager {
      */
     private attachListeners() {
         this.scrollContainer.addEventListener("pointerdown", this.onPointerDown);
-        this.scrollContainer.addEventListener("pointermove", this.onPointerMove, { passive: false });
-        this.scrollContainer.addEventListener("pointerup", this.onPointerUp);
+        window.addEventListener("pointermove", this.onPointerMove, { passive: false });
+        window.addEventListener("pointerup", this.onPointerUp);
     }
 
     /**
@@ -116,11 +116,40 @@ export class PointerEventManager {
         // Check for the Hit Test
         const hit = this.hitTestManager.hitTest(x, y);
 
-        // Delegate the hit test result to the selection manager
-        if (hit) {
-            this.selectionManager.handlePointerMove(hit);
+        // Handle different drag modes
+        if (this.dragMode === "row") {
+            // For row selection, create a synthetic hit based on Y coordinate
+            // even if pointer is outside the row header area
+            const rowHit = this.hitTestManager.hitTest(0, y); // Use x=0 to ensure we hit the row header area
+            if (rowHit && rowHit.type === "row") {
+                this.selectionManager.handlePointerMove(rowHit);
+            } else {
+                // If no row hit at y coordinate, try to find the closest row
+                const syntheticRowHit = this.createSyntheticRowHit(y);
+                if (syntheticRowHit) {
+                    this.selectionManager.handlePointerMove(syntheticRowHit);
+                }
+            }
+        } else if (this.dragMode === "col") {
+            // For column selection, create a synthetic hit based on X coordinate
+            // even if pointer is outside the column header area
+            const colHit = this.hitTestManager.hitTest(x, 0); // Use y=0 to ensure we hit the column header area
+            if (colHit && colHit.type === "col") {
+                this.selectionManager.handlePointerMove(colHit);
+            } else {
+                // If no column hit at x coordinate, try to find the closest column
+                const syntheticColHit = this.createSyntheticColHit(x);
+                if (syntheticColHit) {
+                    this.selectionManager.handlePointerMove(syntheticColHit);
+                }
+            }
         } else {
-            console.log("No hit detected");
+            // For cell selection or other modes, use normal hit testing
+            if (hit) {
+                this.selectionManager.handlePointerMove(hit);
+            } else {
+                console.log("No hit detected");
+            }
         }
 
         // Start the auto-scroll loop if dragging
@@ -240,6 +269,40 @@ export class PointerEventManager {
             e.clientY > bounds.top + container.clientHeight;
 
         return isVerticalScrollbar || isHorizontalScrollbar;
+    }
+
+    /**
+     * Creates a synthetic row hit for the given Y coordinate.
+     * This is used when dragging rows but the pointer moves outside the row header area.
+     * @param {number} y - The Y coordinate to find the row for.
+     * @returns {any | null} - The synthetic row hit or null if no row found.
+     */
+    private createSyntheticRowHit(y: number): any | null {
+        // Try to find a row hit by testing at different X positions in the row header area
+        for (let testX = 0; testX < 100; testX += 10) {
+            const hit = this.hitTestManager.hitTest(testX, y);
+            if (hit && hit.type === "row") {
+                return hit;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Creates a synthetic column hit for the given X coordinate.
+     * This is used when dragging columns but the pointer moves outside the column header area.
+     * @param {number} x - The X coordinate to find the column for.
+     * @returns {any | null} - The synthetic column hit or null if no column found.
+     */
+    private createSyntheticColHit(x: number): any | null {
+        // Try to find a column hit by testing at different Y positions in the column header area
+        for (let testY = 0; testY < 100; testY += 10) {
+            const hit = this.hitTestManager.hitTest(x, testY);
+            if (hit && hit.type === "col") {
+                return hit;
+            }
+        }
+        return null;
     }
 }
 

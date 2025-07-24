@@ -1,7 +1,7 @@
 import { Renderer } from "./Renderer.js";
 import { SelectionManager } from "./selection/SelectionManager.js";
 import { HitTestManager } from "./hittest/HitTestManager.js";
-import { CellHitTestHandler, ColumnHeaderHitTestHandler, RowHitTestHandler } from "./hittest/Handlers.js";
+import { CellHitTestHandler, ColumnHeaderHitTestHandler, RowHitTestHandler, TopLeftCellHitTestHandler } from "./hittest/Handlers.js";
 
 import {
     CellSelectionConfig,
@@ -129,6 +129,7 @@ export class Grid {
 
         // Initialize the HitTestManager with all HitTestHandlers
         this.hitTestManager = new HitTestManager([
+            new TopLeftCellHitTestHandler(this),
             new RowHitTestHandler(this),
             new ColumnHeaderHitTestHandler(this),
             new CellHitTestHandler(this),
@@ -151,7 +152,6 @@ export class Grid {
             this.hitTestManager
         );
     }
-
 
     /**
      * Add a scroll event listener to the scroll container.

@@ -1,7 +1,7 @@
 import { Renderer } from "./Renderer.js";
 import { SelectionManager } from "./selection/SelectionManager.js";
 import { HitTestManager } from "./hittest/HitTestManager.js";
-import { CellHitTestHandler, ColumnHeaderHitTestHandler, RowHitTestHandler } from "./hittest/Handlers.js";
+import { CellHitTestHandler, ColumnHeaderHitTestHandler, RowHitTestHandler, TopLeftCellHitTestHandler } from "./hittest/Handlers.js";
 import { PointerEventManager } from "./pointerEventHandlers.js";
 /**
  * Grid class that manages the rendering of a grid with scrollable functionality.
@@ -72,6 +72,7 @@ export class Grid {
         this.renderer = new Renderer(options, this.ctx, this.columnWidths, this.rowHeights, this);
         // Initialize the HitTestManager with all HitTestHandlers
         this.hitTestManager = new HitTestManager([
+            new TopLeftCellHitTestHandler(this),
             new RowHitTestHandler(this),
             new ColumnHeaderHitTestHandler(this),
             new CellHitTestHandler(this),

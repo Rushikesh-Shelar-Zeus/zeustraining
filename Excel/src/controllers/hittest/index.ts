@@ -16,6 +16,9 @@ export type HitTestResult =
     {
         type: "col";
         col: number;
+    } |
+    {
+        type: "all";
     } | null;
 
 /**

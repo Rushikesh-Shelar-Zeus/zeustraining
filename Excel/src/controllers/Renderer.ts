@@ -70,8 +70,8 @@ export class Renderer {
         this.drawRowSelection(viewPort);
         this.drawColumnSelection(viewPort);
 
-        // Ensure the top-left corner is always clean
-        // this.ensureCleanTopLeftCorner(viewPort);
+        //Draw all Selected Cells
+        this.drawSelectAll(viewPort);
     }
 
     /**
@@ -769,7 +769,7 @@ export class Renderer {
             outerY = Math.min(outerY, drawY);
             outerY2 = Math.max(outerY2, drawY + rowHeight);
         }
-        
+
 
         // Draw border around the visible selection area only if there are visible rows
         if (outerY !== Number.MAX_SAFE_INTEGER && outerY2 > outerY) {
@@ -1117,6 +1117,46 @@ export class Renderer {
                 this.ctx.stroke();
             }
         }
+
+        this.ctx.restore();
+    }
+
+
+    private drawSelectAll(viewPort: Viewport): void {
+        const selection = this.grid.selection;
+        if (!selection || selection.type !== "all") {
+            return; // Only handle select all
+        }
+        // Update column lefts if needed (since it can change based on dynamic header width)
+        this.updateColLeftsIfNeeded(viewPort);
+
+        const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewPort);
+        const width = viewPort.width - dynamicHeaderWidth;
+        const height = viewPort.height - this.options.headerHeight;
+
+        // Calculate the position of the selection rectangle
+        const x = dynamicHeaderWidth;
+        const y = this.options.headerHeight;
+
+        // Save the current canvas state
+        this.ctx.save();
+        this.ctx.fillStyle = COLORS.selectedCellBackground;
+
+        // Draw the selection rectangle for the entire grid
+        this.ctx.fillRect(x, y, width, height);
+        
+        this.ctx.clearRect(dynamicHeaderWidth, this.options.headerHeight, this.columnWidths[0] || this.options.defaultColWidth, this.rowHeights[0] || this.options.defaultRowHeight);
+
+        // Draw the border around the selection rectangle
+        this.ctx.globalAlpha = 1.0;
+        this.ctx.strokeStyle = COLORS.selectedCellOutline;
+        this.ctx.lineWidth = CONFIG.selectedLineWidth;
+        this.ctx.strokeRect(x, y, width, height);
+
+        // Ignore the top-left corner for select all
+        this.ctx.clearRect(0, 0, dynamicHeaderWidth, this.options.headerHeight);
+
+        // Ignore the 1st Cell (origin cell)
 
         this.ctx.restore();
     }

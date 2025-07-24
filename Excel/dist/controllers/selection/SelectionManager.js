@@ -1,4 +1,4 @@
-import { CellRangeSelectionHandler, ColumnSelectionHandler, RowSelectionHandler } from "./Handlers.js";
+import { CellRangeSelectionHandler, ColumnSelectionHandler, RowSelectionHandler, SelectEverythingHandler } from "./Handlers.js";
 /**
  * SelectionManager class that manages selection logic for the grid.
  * It uses different selection handlers based on the hit test result type.
@@ -15,6 +15,7 @@ export class SelectionManager {
         this.currentHandler = null;
         // Initialize the handlers with the CellSelectionHandler
         this.handlersMap = {
+            all: new SelectEverythingHandler(grid, () => this.renderer.render(grid.viewport)),
             cell: new CellRangeSelectionHandler(grid, () => this.renderer.render(grid.viewport)),
             row: new RowSelectionHandler(grid, () => this.renderer.render(grid.viewport)),
             col: new ColumnSelectionHandler(grid, () => this.renderer.render(grid.viewport))

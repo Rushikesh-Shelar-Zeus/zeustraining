@@ -17,9 +17,7 @@ export class TopLeftCellHitTestHandler {
         // Check if the click is in the top-left corner (header area)
         if (x < headerWidth && y < headerHeight) {
             return {
-                type: "cell",
-                row: -1,
-                col: -1
+                type: "all"
             };
         }
         // Not in the top-left corner

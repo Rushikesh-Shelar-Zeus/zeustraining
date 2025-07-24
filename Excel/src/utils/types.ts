@@ -70,7 +70,7 @@ export interface HitTestContext {
  */
 export interface CellSelectionConfig {
     /** The type of selection (cell, row, or column) */
-    type: "cell" | "row" | "col";
+    type: "cell" | "row" | "col" | "all";
     /** The starting row index of the selection */
     startRow: number;
     /** The starting column index of the selection */

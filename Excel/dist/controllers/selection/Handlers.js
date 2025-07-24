@@ -1,3 +1,31 @@
+export class SelectEverythingHandler {
+    /**
+     * Constructor for the SelectEverythingHandler.
+     * @param {Grid} grid - The Grid instance to manage selection for.
+     * @param {Function} onSelectionChange - Callback to trigger on selection change.
+     */
+    constructor(grid, onSelectionChange) {
+        this.grid = grid;
+        this.onSelectionChange = onSelectionChange;
+    }
+    onPointerDown(hit) {
+        if (!hit || hit.type !== "all") {
+            return;
+        }
+        // Set the selection to cover the entire grid
+        this.grid.selection = {
+            type: "all",
+            startRow: 0,
+            startCol: 0,
+            endRow: this.grid.totalRows - 1,
+            endCol: this.grid.totalCols - 1,
+            originRow: -1,
+            originCol: -1
+        };
+        // Trigger the selection change callback
+        this.onSelectionChange();
+    }
+}
 /**
  * Cell Selection Handler
  * This class implements the SelectionHandler interface to handle cell selection
