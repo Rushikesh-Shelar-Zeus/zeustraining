@@ -8,6 +8,16 @@ import { Grid } from "./Grid.js";
  */
 export class Renderer {
 
+    /** @type {Array<number>} - Prefix Sum of the row heights */
+    private readonly rowTops: number[] = [];
+
+    /** @type {Array<number>} - Prefix Sum of the column widths */
+    private readonly colLefts: number[] = [];
+
+    /** @type {number | null} - Last dynamic header width calculated */
+    private lastHeaderWidth: number | null = null;
+
+
     /**
      * Constructor to initialize the Renderer instance.
      * @param {GridOptions} options - The grid options containing configuration for the grid.
@@ -22,7 +32,22 @@ export class Renderer {
         private readonly columnWidths: number[],
         private readonly rowHeights: number[],
         private readonly grid: Grid
-    ) { }
+    ) {
+
+        // Cache the Cumulative Offset for rows and columns
+        let y = this.options.headerHeight;
+        for (let i = 0; i < this.rowHeights.length; i++) {
+            this.rowTops[i] = y;
+            y += this.rowHeights[i];
+        }
+
+        let x = this.getDynamicHeaderWidth(this.grid.viewport);
+        for (let i = 0; i < this.columnWidths.length; i++) {
+            this.colLefts[i] = x;
+            x += this.columnWidths[i];
+        }
+
+    }
 
     /**
      * Handles the rendering of the grid based on the current viewport.
@@ -46,21 +71,20 @@ export class Renderer {
         this.drawColumnSelection(viewPort);
 
         // Ensure the top-left corner is always clean
-        this.ensureCleanTopLeftCorner(viewPort);
+        // this.ensureCleanTopLeftCorner(viewPort);
     }
 
-    /**
-     * Ensures the top-left corner cell is always clean and properly styled
-     * This prevents any selection highlighting from bleeding into this area.
-     * @param {Viewport} viewPort - The current viewport dimensions and scroll position.
-     * @returns {void}
-     */
-    private ensureCleanTopLeftCorner(viewPort: Viewport): void {
-        const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewPort);
-        
-        // Always redraw the top-left corner with the correct background
-        this.ctx.fillStyle = COLORS.headerBackground;
-        this.ctx.fillRect(0, 0, dynamicHeaderWidth, this.options.headerHeight);
+    public updateColLeftsIfNeeded(viewport: Viewport) {
+        const currentHeaderWidth = this.getDynamicHeaderWidth(viewport);
+
+        if (this.lastHeaderWidth !== currentHeaderWidth) {
+            let x = currentHeaderWidth;
+            for (let i = 0; i < this.columnWidths.length; i++) {
+                this.colLefts[i] = x;
+                x += this.columnWidths[i];
+            }
+            this.lastHeaderWidth = currentHeaderWidth;
+        }
     }
 
     /**
@@ -390,7 +414,7 @@ export class Renderer {
 
         // Draw the selection rectangle on Headers (Row, Column) with proper clipping
         this.ctx.fillStyle = COLORS.selectedCellBackground;
-        
+
         // Draw column header highlight only if it doesn't overlap top-left corner
         if (drawX >= dynamicHeaderWidth || drawX + cellWidth > dynamicHeaderWidth) {
             const headerStartX = Math.max(drawX, dynamicHeaderWidth);
@@ -399,7 +423,7 @@ export class Renderer {
                 this.ctx.fillRect(headerStartX, 0, headerWidth, this.options.headerHeight);
             }
         }
-        
+
         // Draw row header highlight only if it doesn't overlap top-left corner
         if (drawY >= this.options.headerHeight || drawY + cellHeight > this.options.headerHeight) {
             const headerStartY = Math.max(drawY, this.options.headerHeight);
@@ -487,6 +511,9 @@ export class Renderer {
         const selection = this.grid.selection;
         if (!selection || selection.type !== "cell") return;
 
+        // Update column lefts if needed (since it can change based on dynamic header width)
+        this.updateColLeftsIfNeeded(viewport);
+
         const { startRow, endRow, startCol, endCol, originRow, originCol } = selection;
         const { scrollX, scrollY } = viewport;
         const headerHeight = this.options.headerHeight;
@@ -498,6 +525,7 @@ export class Renderer {
             this.drawCellSelection(viewport);
             return;
         }
+
 
         // Save canvas state
         this.ctx.save();
@@ -511,16 +539,23 @@ export class Renderer {
         let outerY2 = 0;
 
         for (let row = startRow; row <= endRow; row++) {
-            let y = headerHeight;
-            for (let r = 0; r < row; r++) y += this.rowHeights[r];
-            let drawY = y - scrollY;
+            ``
+            // Calculate the position of the row header
+            let drawY = this.rowTops[row] - scrollY;
             let cellHeight = this.rowHeights[row];
 
+            // Skip off-screen rows
+            if (this.rowTops[row] + this.rowHeights[row] < scrollY || this.rowTops[row] > scrollY + viewport.height)
+                continue;
+
             for (let col = startCol; col <= endCol; col++) {
-                let x = dynamicHeaderWidth;
-                for (let c = 0; c < col; c++) x += this.columnWidths[c];
-                let drawX = x - scrollX;
+                // Calculate the position of the column header
+                let drawX = this.colLefts[col] - scrollX;
                 let cellWidth = this.columnWidths[col];
+
+                // Skip off-screen columns
+                if (this.colLefts[col] + this.columnWidths[col] < scrollX || this.colLefts[col] > scrollX + viewport.width)
+                    continue;
 
                 // Skip off-screen cells
                 if (
@@ -561,7 +596,7 @@ export class Renderer {
         this.ctx.restore();
 
         // Highlight headers
-        this.drawHeaderHighlights(selection, viewport);
+        this.drawHeaderHighlights(selection, viewport, this.rowTops, this.colLefts);
     }
 
     /**
@@ -571,19 +606,24 @@ export class Renderer {
      * @param {Viewport} viewport - The current viewport dimensions and scroll position.
      * @returns {void}
      */
-    private drawHeaderHighlights(selected: CellSelectionConfig, viewport: Viewport): void {
+    private drawHeaderHighlights(selected: CellSelectionConfig, viewport: Viewport, rowTops: number[], colLefts: number[]): void {
         const { scrollX, scrollY } = viewport;
 
         const { startRow, endRow, startCol, endCol } = selected;
         const headerHeight = this.options.headerHeight;
         const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewport);
 
+        // Update column lefts if needed (since it can change based on dynamic header width)
+        this.updateColLeftsIfNeeded(viewport);
+
         // Highlight column headers (bottom border)
         for (let col = startCol; col <= endCol; col++) {
-            let x = dynamicHeaderWidth;
-            for (let c = 0; c < col; c++) x += this.columnWidths[c];
-            let drawX = x - scrollX;
+            let drawX = colLefts[col] - scrollX;
             let cellWidth = this.columnWidths[col];
+
+            // Skip off-screen columns
+            if (drawX + cellWidth < 0 || drawX > viewport.width) continue;
+
 
             // Only draw border if it doesn't overlap top-left corner
             if (drawX + cellWidth > dynamicHeaderWidth) {
@@ -600,10 +640,11 @@ export class Renderer {
 
         // Highlight row headers (right border)
         for (let row = startRow; row <= endRow; row++) {
-            let y = headerHeight;
-            for (let r = 0; r < row; r++) y += this.rowHeights[r];
-            let drawY = y - scrollY;
+            let drawY = rowTops[row] - scrollY;
             let cellHeight = this.rowHeights[row];
+
+            // Skip off-screen rows
+            if (drawY + cellHeight < headerHeight || drawY > viewport.height) continue;
 
             // Only draw border if it doesn't overlap top-left corner
             if (drawY + cellHeight > headerHeight) {
@@ -620,31 +661,33 @@ export class Renderer {
 
         this.ctx.fillStyle = COLORS.selectedCellBackground;
 
+        this.ctx.save();
+        // Clip to the header area only
+        this.clipColumnHeadersOnly(this.ctx, viewport);
+
         // Fill the Col headers for selected columns
         for (let col = startCol; col <= endCol; col++) {
-            let x = this.columnWidths.slice(0, col).reduce((a, b) => a + b, 0) + dynamicHeaderWidth;
-            let drawX = x - scrollX;
+            let drawX = colLefts[col] - scrollX;
             let cellWidth = this.columnWidths[col];
 
-            this.ctx.save();
-            // Clip to the header area only
-            this.clipColumnHeadersOnly(this.ctx, viewport);
+
             this.ctx.fillRect(drawX, 0, cellWidth, this.options.headerHeight); // top header row
-            this.ctx.restore();
         }
+        this.ctx.restore(); // Restore context after filling headers
+
+        this.ctx.save();
+        // Clip to the header area only
+        this.clipRowHeadersOnly(this.ctx, viewport);
 
         // Fill row headers for selected rows
         for (let row = startRow; row <= endRow; row++) {
-            let y = this.rowHeights.slice(0, row).reduce((a, b) => a + b, 0) + this.options.headerHeight;
-            let drawY = y - scrollY;
+            let drawY = rowTops[row] - scrollY;
             let cellHeight = this.rowHeights[row];
 
-            this.ctx.save();
-            // Clip to the header area only
-            this.clipRowHeadersOnly(this.ctx, viewport);
+
             this.ctx.fillRect(0, drawY, dynamicHeaderWidth, cellHeight); // left header column
-            this.ctx.restore();
         }
+        this.ctx.restore(); // Restore context after filling headers
     }
 
     /**
@@ -686,9 +729,7 @@ export class Renderer {
 
         // Loop through selected rows and visible columns
         for (let row = fromRow; row <= toRow; row++) {
-            let y = headerHeight;
-            for (let r = 0; r < row; r++) y += this.rowHeights[r];
-            let drawY = y - scrollY;
+            let drawY = this.rowTops[row] - scrollY;
             let rowHeight = this.rowHeights[row] || this.options.defaultRowHeight;
 
             // Skip off-screen rows
@@ -696,11 +737,12 @@ export class Renderer {
                 continue;
             }
 
+            // Update column lefts if needed (since it can change based on dynamic header width)
+            this.updateColLeftsIfNeeded(viewPort);
+
             // Loop through all visible columns for this row
             for (let col = startCol; col <= endCol; col++) {
-                let x = dynamicHeaderWidth;
-                for (let c = 0; c < col; c++) x += this.columnWidths[c];
-                let drawX = x - scrollX;
+                let drawX = this.colLefts[col] - scrollX;
                 let cellWidth = this.columnWidths[col] || this.options.defaultColWidth;
 
                 // Skip off-screen cells
@@ -736,8 +778,8 @@ export class Renderer {
         this.ctx.restore();
 
         // Draw row and column header highlights
-        this.drawRowHeaderHighlights(fromRow, toRow, viewPort);
-        this.drawColumnHeadersForRowSelection(viewPort);
+        this.drawRowHeaderHighlights(fromRow, toRow, viewPort, this.rowTops);
+        this.drawColumnHeadersForRowSelection(viewPort, this.colLefts);
     }
 
     /**
@@ -748,7 +790,7 @@ export class Renderer {
      * @param {Viewport} viewport - The current viewport dimensions and scroll position.
      * @returns {void}
      */
-    private drawRowHeaderHighlights(startRow: number, endRow: number, viewport: Viewport): void {
+    private drawRowHeaderHighlights(startRow: number, endRow: number, viewport: Viewport, rowTops: number[]): void {
         const { headerHeight } = this.options;
         const { scrollY } = viewport;
         const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewport);
@@ -765,9 +807,7 @@ export class Renderer {
         this.ctx.fillStyle = COLORS.selectedCellBackground;
 
         for (let row = fromRow; row <= toRow; row++) {
-            let y = headerHeight;
-            for (let r = 0; r < row; r++) y += this.rowHeights[r];
-            let drawY = y - scrollY;
+            let drawY = rowTops[row] - scrollY;
             let rowHeight = this.rowHeights[row];
 
             // Only draw header highlight if the row is visible
@@ -782,18 +822,16 @@ export class Renderer {
         this.ctx.save();
         this.ctx.lineWidth = CONFIG.selectedLineWidth;
         this.ctx.strokeStyle = COLORS.selectedCellOutline;
-        
+
         for (let row = fromRow; row <= toRow; row++) {
-            let y = headerHeight;
-            for (let r = 0; r < row; r++) y += this.rowHeights[r];
-            let drawY = y - scrollY;
+            let drawY = rowTops[row] - scrollY;
             let rowHeight = this.rowHeights[row];
 
             // Only draw border if the row is visible and doesn't overlap top-left corner
             if (drawY + rowHeight >= headerHeight && drawY <= viewport.height) {
                 this.ctx.beginPath();
                 // For 2px lines, adjust alignment differently
-                const alignX = Math.floor(dynamicHeaderWidth); 
+                const alignX = Math.floor(dynamicHeaderWidth);
                 // Ensure the line doesn't extend into the top-left corner
                 const lineStartY = Math.max(drawY, headerHeight);
                 const lineEndY = Math.min(drawY + rowHeight, viewport.height);
@@ -802,7 +840,7 @@ export class Renderer {
                 this.ctx.stroke();
             }
         }
-        
+
         this.ctx.restore();
     }
 
@@ -812,10 +850,13 @@ export class Renderer {
      * @param {Viewport} viewport - The current viewport dimensions and scroll position.
      * @returns {void}
      */
-    private drawColumnHeadersForRowSelection(viewport: Viewport): void {
+    private drawColumnHeadersForRowSelection(viewport: Viewport, colLefts: number[]): void {
         const { scrollX } = viewport;
         const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewport);
         const { startCol, endCol } = this.getvisibleRange(viewport);
+
+        // Update column lefts if needed (since it can change based on dynamic header width)
+        this.updateColLeftsIfNeeded(viewport);
 
         this.ctx.save();
 
@@ -826,9 +867,7 @@ export class Renderer {
 
         // Highlight all visible column headers
         for (let col = startCol; col <= endCol; col++) {
-            let x = dynamicHeaderWidth;
-            for (let c = 0; c < col; c++) x += this.columnWidths[c];
-            let drawX = x - scrollX;
+            let drawX = colLefts[col] - scrollX;
             let cellWidth = this.columnWidths[col] || this.options.defaultColWidth;
 
             // Only draw if the column header is visible
@@ -848,11 +887,9 @@ export class Renderer {
         this.ctx.save();
         this.ctx.lineWidth = CONFIG.selectedLineWidth;
         this.ctx.strokeStyle = COLORS.selectedCellOutline;
-        
+
         for (let col = startCol; col <= endCol; col++) {
-            let x = dynamicHeaderWidth;
-            for (let c = 0; c < col; c++) x += this.columnWidths[c];
-            let drawX = x - scrollX;
+            let drawX = colLefts[col] - scrollX;
             let cellWidth = this.columnWidths[col] || this.options.defaultColWidth;
 
             // Only draw if the column header is visible and doesn't overlap top-left corner
@@ -868,7 +905,7 @@ export class Renderer {
                 this.ctx.stroke();
             }
         }
-        
+
         this.ctx.restore();
     }
 
@@ -891,6 +928,9 @@ export class Renderer {
         const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewPort);
         const { startRow, endRow } = this.getvisibleRange(viewPort);
 
+        // Update column lefts if needed (since it can change based on dynamic header width)
+        this.updateColLeftsIfNeeded(viewPort);
+
         const fromCol = Math.min(startCol, endCol);
         const toCol = Math.max(startCol, endCol);
 
@@ -909,9 +949,7 @@ export class Renderer {
 
         // Loop through selected columns and visible rows
         for (let col = fromCol; col <= toCol; col++) {
-            let x = dynamicHeaderWidth;
-            for (let c = 0; c < col; c++) x += this.columnWidths[c];
-            let drawX = x - scrollX;
+            let drawX = this.colLefts[col] - scrollX;
             let colWidth = this.columnWidths[col] || this.options.defaultColWidth;
 
             // Skip off-screen columns
@@ -921,9 +959,7 @@ export class Renderer {
 
             // Loop through all visible rows for this column
             for (let row = startRow; row <= endRow; row++) {
-                let y = headerHeight;
-                for (let r = 0; r < row; r++) y += this.rowHeights[r];
-                let drawY = y - scrollY;
+                let drawY = this.rowTops[row] - scrollY;
                 let cellHeight = this.rowHeights[row] || this.options.defaultRowHeight;
 
                 // Skip off-screen cells
@@ -960,8 +996,8 @@ export class Renderer {
         this.ctx.restore();
 
         // Draw row and column header highlights
-        this.drawColumnHeaderHighlights(fromCol, toCol, viewPort);
-        this.drawRowHeaderHighlightsForColumnSelection(viewPort);
+        this.drawColumnHeaderHighlights(fromCol, toCol, viewPort, this.colLefts);
+        this.drawRowHeaderHighlightsForColumnSelection(viewPort, this.rowTops);
     }
 
     /**
@@ -972,10 +1008,13 @@ export class Renderer {
      * @param {Viewport} viewport - The current viewport dimensions and scroll position.
      * @returns {void}
      */
-    private drawColumnHeaderHighlights(startCol: number, endCol: number, viewport: Viewport): void {
+    private drawColumnHeaderHighlights(startCol: number, endCol: number, viewport: Viewport, colLefts: number[]): void {
         const { headerHeight } = this.options;
         const { scrollX } = viewport;
         const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewport);
+
+        // Update column lefts if needed (since it can change based on dynamic header width)
+        this.updateColLeftsIfNeeded(viewport);
 
         const fromCol = Math.min(startCol, endCol);
         const toCol = Math.max(startCol, endCol);
@@ -988,9 +1027,7 @@ export class Renderer {
         this.ctx.fillStyle = COLORS.selectedCellBackground;
 
         for (let col = fromCol; col <= toCol; col++) {
-            let x = dynamicHeaderWidth;
-            for (let c = 0; c < col; c++) x += this.columnWidths[c];
-            let drawX = x - scrollX;
+            let drawX = colLefts[col] - scrollX;
             let colWidth = this.columnWidths[col];
 
             // Only draw header highlight if the column is visible
@@ -1005,11 +1042,9 @@ export class Renderer {
         this.ctx.save();
         this.ctx.lineWidth = CONFIG.selectedLineWidth;
         this.ctx.strokeStyle = COLORS.selectedCellOutline;
-        
+
         for (let col = fromCol; col <= toCol; col++) {
-            let x = dynamicHeaderWidth;
-            for (let c = 0; c < col; c++) x += this.columnWidths[c];
-            let drawX = x - scrollX;
+            let drawX = colLefts[col] - scrollX;
             let colWidth = this.columnWidths[col];
 
             // Only draw border if the column is visible and doesn't overlap top-left corner
@@ -1025,7 +1060,7 @@ export class Renderer {
                 this.ctx.stroke();
             }
         }
-        
+
         this.ctx.restore();
     }
 
@@ -1035,7 +1070,7 @@ export class Renderer {
      * @param {Viewport} viewport - The current viewport dimensions and scroll position.
      * @returns {void}
      */
-    private drawRowHeaderHighlightsForColumnSelection(viewport: Viewport): void {
+    private drawRowHeaderHighlightsForColumnSelection(viewport: Viewport, rowTops: number[]): void {
         const { scrollY } = viewport;
         const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewport);
         const { startRow, endRow } = this.getvisibleRange(viewport);
@@ -1048,9 +1083,7 @@ export class Renderer {
 
         // Highlight all visible row headers
         for (let row = startRow; row <= endRow; row++) {
-            let y = this.options.headerHeight;
-            for (let r = 0; r < row; r++) y += this.rowHeights[r];
-            let drawY = y - scrollY;
+            let drawY = rowTops[row] - scrollY;
             let cellHeight = this.rowHeights[row] || this.options.defaultRowHeight;
 
             // Only draw if the row header is visible
@@ -1065,11 +1098,9 @@ export class Renderer {
         this.ctx.save();
         this.ctx.lineWidth = CONFIG.selectedLineWidth;
         this.ctx.strokeStyle = COLORS.selectedCellOutline;
-        
+
         for (let row = startRow; row <= endRow; row++) {
-            let y = this.options.headerHeight;
-            for (let r = 0; r < row; r++) y += this.rowHeights[r];
-            let drawY = y - scrollY;
+            let drawY = rowTops[row] - scrollY;
             let cellHeight = this.rowHeights[row] || this.options.defaultRowHeight;
 
             // Only draw if the row header is visible and doesn't overlap top-left corner
@@ -1085,7 +1116,7 @@ export class Renderer {
                 this.ctx.stroke();
             }
         }
-        
+
         this.ctx.restore();
     }
 }

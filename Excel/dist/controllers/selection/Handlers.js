@@ -57,6 +57,12 @@ export class CellRangeSelectionHandler {
         this.startRow = -1;
         /** @type {number} - The starting column for the selection */
         this.startCol = -1;
+        /** @type {number} - Last row selected */
+        this.lastRow = -1;
+        /** @type {number} - Last column selected */
+        this.lastCol = -1;
+        /** @type {boolean} - Indicates if the render is scheduled */
+        this.isRenderScheduled = false;
     }
     /**
      * Handles pointer down events for cell range selection.
@@ -94,6 +100,17 @@ export class CellRangeSelectionHandler {
         if (hit?.type !== "cell") {
             return;
         }
+        if (this.startRow === -1 || this.startCol === -1) {
+            // If the starting row or column is not set, do nothing
+            return;
+        }
+        if (this.lastCol === hit.col && this.lastRow === hit.row) {
+            // If the same cell is hovered, do not change the selection
+            return;
+        }
+        // Update the last row and column selected
+        this.lastRow = hit.row;
+        this.lastCol = hit.col;
         // Update the selection based on the current hit test result
         const newSelection = {
             type: "cell",
@@ -107,7 +124,7 @@ export class CellRangeSelectionHandler {
         // Update the grid's selection state
         this.grid.selection = newSelection;
         // Trigger the selection change callback
-        this.onSelectionChange();
+        this.scheduleRender();
     }
     /**
      * Handles pointer up events for cell range selection.
@@ -117,6 +134,17 @@ export class CellRangeSelectionHandler {
     onPointerUp() {
         this.startRow = -1;
         this.startCol = -1;
+    }
+    scheduleRender() {
+        if (!this.isRenderScheduled) {
+            this.isRenderScheduled = true;
+            requestAnimationFrame(() => {
+                console.time("selectionRender");
+                this.onSelectionChange();
+                console.timeEnd("selectionRender");
+                this.isRenderScheduled = false;
+            });
+        }
     }
 }
 /**
@@ -136,6 +164,8 @@ export class RowSelectionHandler {
         this.onSelectionChange = onSelectionChange;
         /** @type {number} - The starting row for the selection */
         this.startRow = -1;
+        /** @type {number} - Last row selected */
+        this.lastRow = -1;
     }
     /**
      * Handles pointer down events for row selection.
@@ -171,6 +201,11 @@ export class RowSelectionHandler {
     onPointerMove(hit) {
         if (!hit || hit.type !== "row" || this.startRow === -1)
             return;
+        if (this.lastRow === hit.row) {
+            // If the same row is hovered, do not change the selection
+            return;
+        }
+        this.lastRow = hit.row;
         // Update the selection based on the current hit test result
         this.grid.selection = {
             type: "row",
@@ -205,6 +240,8 @@ export class ColumnSelectionHandler {
         this.onSelectionChange = onSelectionChange;
         /** @type {number} - The starting column for the selection */
         this.startCol = -1;
+        /** @type {number} - Last column selected */
+        this.lastCol = -1;
     }
     /**
      * Handles pointer down events for column selection.
@@ -240,6 +277,11 @@ export class ColumnSelectionHandler {
     onPointerMove(hit) {
         if (!hit || hit.type !== "col" || this.startCol === -1)
             return;
+        if (this.lastCol === hit.col) {
+            // If the same column is hovered, do not change the selection
+            return;
+        }
+        this.lastCol = hit.col;
         this.grid.selection = {
             type: "col",
             startRow: -1,

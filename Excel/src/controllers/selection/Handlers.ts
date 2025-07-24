@@ -61,6 +61,16 @@ export class CellRangeSelectionHandler implements SelectionHandler {
     /** @type {number} - The starting column for the selection */
     private startCol: number = -1;
 
+    /** @type {number} - Last row selected */
+    private lastRow: number = -1;
+
+    /** @type {number} - Last column selected */
+    private lastCol: number = -1;
+
+    /** @type {boolean} - Indicates if the render is scheduled */
+    private isRenderScheduled: boolean = false;
+
+
     /**
      * Constructor for the CellRangeSelectionHandler.
      * @param {Grid} grid - The Grid instance to manage selection for.
@@ -82,6 +92,7 @@ export class CellRangeSelectionHandler implements SelectionHandler {
         if (hit?.type !== "cell") {
             return;
         }
+
         // Initialize the starting row and column for the selection
         this.startRow = hit.row;
         this.startCol = hit.col;
@@ -111,6 +122,22 @@ export class CellRangeSelectionHandler implements SelectionHandler {
         if (hit?.type !== "cell") {
             return;
         }
+
+        if (this.startRow === -1 || this.startCol === -1) {
+            // If the starting row or column is not set, do nothing
+            return;
+        }
+
+        if (this.lastCol === hit.col && this.lastRow === hit.row) {
+            // If the same cell is hovered, do not change the selection
+            return;
+        }
+
+        // Update the last row and column selected
+        this.lastRow = hit.row;
+        this.lastCol = hit.col;
+
+
         // Update the selection based on the current hit test result
         const newSelection = {
             type: "cell" as const,
@@ -125,7 +152,7 @@ export class CellRangeSelectionHandler implements SelectionHandler {
         // Update the grid's selection state
         this.grid.selection = newSelection;
         // Trigger the selection change callback
-        this.onSelectionChange();
+        this.scheduleRender();
     }
 
     /**
@@ -136,6 +163,19 @@ export class CellRangeSelectionHandler implements SelectionHandler {
     onPointerUp(): void {
         this.startRow = -1;
         this.startCol = -1;
+    }
+
+
+    private scheduleRender(): void {
+        if (!this.isRenderScheduled) {
+            this.isRenderScheduled = true;
+            requestAnimationFrame(() => {
+                console.time("selectionRender");
+                this.onSelectionChange();
+                console.timeEnd("selectionRender");
+                this.isRenderScheduled = false;
+            });
+        }
     }
 }
 
@@ -148,6 +188,9 @@ export class CellRangeSelectionHandler implements SelectionHandler {
 export class RowSelectionHandler implements SelectionHandler {
     /** @type {number} - The starting row for the selection */
     private startRow: number = -1;
+
+    /** @type {number} - Last row selected */
+    private lastRow: number = -1;
 
     /**
      * Constructor for the RowSelectionHandler.
@@ -197,6 +240,13 @@ export class RowSelectionHandler implements SelectionHandler {
     onPointerMove(hit: HitTestResult): void {
         if (!hit || hit.type !== "row" || this.startRow === -1) return;
 
+        if (this.lastRow === hit.row) {
+            // If the same row is hovered, do not change the selection
+            return;
+        }
+
+        this.lastRow = hit.row;
+
         // Update the selection based on the current hit test result
         this.grid.selection = {
             type: "row",
@@ -223,9 +273,12 @@ export class RowSelectionHandler implements SelectionHandler {
     }
 }
 
-export class ColumnSelectionHandler implements SelectionHandler{
+export class ColumnSelectionHandler implements SelectionHandler {
     /** @type {number} - The starting column for the selection */
     private startCol: number = -1;
+
+    /** @type {number} - Last column selected */
+    private lastCol: number = -1;
 
     /**
      * Constructor for the ColumnSelectionHandler.
@@ -244,7 +297,7 @@ export class ColumnSelectionHandler implements SelectionHandler{
      * @returns {void}
      */
     onPointerDown(hit: HitTestResult): void {
-        if (!hit || hit.type !== "col"){
+        if (!hit || hit.type !== "col") {
             return;
         }
 
@@ -274,6 +327,13 @@ export class ColumnSelectionHandler implements SelectionHandler{
      */
     onPointerMove(hit: HitTestResult): void {
         if (!hit || hit.type !== "col" || this.startCol === -1) return;
+
+        if (this.lastCol === hit.col) {
+            // If the same column is hovered, do not change the selection
+            return;
+        }
+
+        this.lastCol = hit.col;
 
         this.grid.selection = {
             type: "col",

@@ -46,7 +46,7 @@ export class PointerEventManager {
      */
     private attachListeners() {
         this.scrollContainer.addEventListener("pointerdown", this.onPointerDown);
-        this.scrollContainer.addEventListener("pointermove", this.onPointerMove);
+        this.scrollContainer.addEventListener("pointermove", this.onPointerMove, { passive: false });
         this.scrollContainer.addEventListener("pointerup", this.onPointerUp);
     }
 
@@ -101,8 +101,6 @@ export class PointerEventManager {
 
         // Ignore clicks on the scrollbar
         if (this.isScrollbarClick(e, this.scrollContainer)) return;
-
-        e.preventDefault();
 
         if (!this.isDragging) return;
 

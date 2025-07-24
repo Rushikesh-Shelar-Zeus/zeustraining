@@ -49,7 +49,6 @@ export class SelectionManager {
         const handler = this.handlersMap[hit.type];
         if (handler) {
             this.currentHandler = handler;
-            console.log(this.currentHandler);
             handler.onPointerDown(hit);
         }
     }
