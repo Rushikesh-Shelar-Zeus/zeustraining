@@ -27,8 +27,8 @@ export class SelectEverythingHandler implements SelectionHandler {
             startCol: 0,
             endRow: this.grid.totalRows - 1,
             endCol: this.grid.totalCols - 1,
-            originRow: -1,
-            originCol: -1
+            originRow: 0,
+            originCol: 0
         };
 
         // Trigger the selection change callback

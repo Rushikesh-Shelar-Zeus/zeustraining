@@ -904,6 +904,7 @@ export class Renderer {
     }
     drawSelectAll(viewPort) {
         const selection = this.grid.selection;
+        console.log(selection);
         if (!selection || selection.type !== "all") {
             return; // Only handle select all
         }
@@ -920,15 +921,38 @@ export class Renderer {
         this.ctx.fillStyle = COLORS.selectedCellBackground;
         // Draw the selection rectangle for the entire grid
         this.ctx.fillRect(x, y, width, height);
-        this.ctx.clearRect(dynamicHeaderWidth, this.options.headerHeight, this.columnWidths[0] || this.options.defaultColWidth, this.rowHeights[0] || this.options.defaultRowHeight);
+        // Check if origin cell (0,0) is visible and clear it if needed
+        const { scrollX, scrollY } = viewPort;
+        const originCellX = this.colLefts[0] - scrollX;
+        const originCellY = this.rowTops[0] - scrollY;
+        const originCellWidth = this.columnWidths[0] || this.options.defaultColWidth;
+        const originCellHeight = this.rowHeights[0] || this.options.defaultRowHeight;
+        // Check if the origin cell (0,0) is actually visible in the viewport
+        const isOriginCellVisible = originCellX + originCellWidth > dynamicHeaderWidth &&
+            originCellX < viewPort.width &&
+            originCellY + originCellHeight > this.options.headerHeight &&
+            originCellY < viewPort.height;
+        const isOrigin = selection.originRow === 0 && selection.originCol === 0 && isOriginCellVisible;
+        if (isOrigin) {
+            // Calculate the visible portion of the origin cell
+            const visibleX = Math.max(originCellX, dynamicHeaderWidth);
+            const visibleY = Math.max(originCellY, this.options.headerHeight);
+            const visibleWidth = Math.min(originCellX + originCellWidth, viewPort.width) - visibleX;
+            const visibleHeight = Math.min(originCellY + originCellHeight, viewPort.height) - visibleY;
+            // Only clear if there's a visible portion
+            if (visibleWidth > 0 && visibleHeight > 0) {
+                this.ctx.clearRect(visibleX, visibleY, visibleWidth, visibleHeight);
+            }
+        }
         // Draw the border around the selection rectangle
         this.ctx.globalAlpha = 1.0;
         this.ctx.strokeStyle = COLORS.selectedCellOutline;
         this.ctx.lineWidth = CONFIG.selectedLineWidth;
         this.ctx.strokeRect(x, y, width, height);
-        // Ignore the top-left corner for select all
-        this.ctx.clearRect(0, 0, dynamicHeaderWidth, this.options.headerHeight);
-        // Ignore the 1st Cell (origin cell)
-        this.ctx.restore();
+        //Draw the top header row
+        this.ctx.fillStyle = COLORS.selectedCellBackground;
+        this.ctx.fillRect(dynamicHeaderWidth, 0, width, this.options.headerHeight);
+        // Draw the left header column
+        this.ctx.fillRect(0, this.options.headerHeight, dynamicHeaderWidth, height);
     }
 }

@@ -15,7 +15,7 @@ export class TopLeftCellHitTestHandler implements HitTestHandler {
     constructor(private readonly grid: Grid) { }
 
     hitTest(x: number, y: number): HitTestResult | null {
-        const { headerHeight, headerWidth, scrollX, scrollY } = this.grid.HitTestContext;
+        const { headerHeight, headerWidth } = this.grid.HitTestContext;
 
         // Check if the click is in the top-left corner (header area)
         if (x < headerWidth && y < headerHeight) {
