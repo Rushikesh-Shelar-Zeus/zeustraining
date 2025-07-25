@@ -18,21 +18,17 @@ export class Renderer {
         this.columnWidths = columnWidths;
         this.rowHeights = rowHeights;
         this.grid = grid;
-        /** @type {Array<number>} - Prefix Sum of the row heights */
-        this.rowTops = [];
-        /** @type {Array<number>} - Prefix Sum of the column widths */
-        this.colLefts = [];
         /** @type {number | null} - Last dynamic header width calculated */
         this.lastHeaderWidth = null;
         // Cache the Cumulative Offset for rows and columns
         let y = this.options.headerHeight;
         for (let i = 0; i < this.rowHeights.length; i++) {
-            this.rowTops[i] = y;
+            this.grid.rowTops[i] = y;
             y += this.rowHeights[i];
         }
         let x = this.getDynamicHeaderWidth(this.grid.viewport);
         for (let i = 0; i < this.columnWidths.length; i++) {
-            this.colLefts[i] = x;
+            this.grid.colLefts[i] = x;
             x += this.columnWidths[i];
         }
     }
@@ -65,7 +61,7 @@ export class Renderer {
         if (this.lastHeaderWidth !== currentHeaderWidth) {
             let x = currentHeaderWidth;
             for (let i = 0; i < this.columnWidths.length; i++) {
-                this.colLefts[i] = x;
+                this.grid.colLefts[i] = x;
                 x += this.columnWidths[i];
             }
             this.lastHeaderWidth = currentHeaderWidth;
@@ -445,19 +441,18 @@ export class Renderer {
         let outerX2 = 0;
         let outerY2 = 0;
         for (let row = startRow; row <= endRow; row++) {
-            ``;
             // Calculate the position of the row header
-            let drawY = this.rowTops[row] - scrollY;
+            let drawY = this.grid.rowTops[row] - scrollY;
             let cellHeight = this.rowHeights[row];
             // Skip off-screen rows
-            if (this.rowTops[row] + this.rowHeights[row] < scrollY || this.rowTops[row] > scrollY + viewport.height)
+            if (this.grid.rowTops[row] + this.rowHeights[row] < scrollY || this.grid.rowTops[row] > scrollY + viewport.height)
                 continue;
             for (let col = startCol; col <= endCol; col++) {
                 // Calculate the position of the column header
-                let drawX = this.colLefts[col] - scrollX;
+                let drawX = this.grid.colLefts[col] - scrollX;
                 let cellWidth = this.columnWidths[col];
                 // Skip off-screen columns
-                if (this.colLefts[col] + this.columnWidths[col] < scrollX || this.colLefts[col] > scrollX + viewport.width)
+                if (this.grid.colLefts[col] + this.columnWidths[col] < scrollX || this.grid.colLefts[col] > scrollX + viewport.width)
                     continue;
                 // Skip off-screen cells
                 if (drawX + cellWidth <= dynamicHeaderWidth ||
@@ -490,7 +485,7 @@ export class Renderer {
         // Restore canvas state
         this.ctx.restore();
         // Highlight headers
-        this.drawHeaderHighlights(selection, viewport, this.rowTops, this.colLefts);
+        this.drawHeaderHighlights(selection, viewport, this.grid.rowTops, this.grid.colLefts);
     }
     /**
      * Draws highlights for the headers based on the selected cell range.
@@ -599,7 +594,7 @@ export class Renderer {
         const originColVisible = originCol >= startCol && originCol <= endCol;
         // Loop through selected rows and visible columns
         for (let row = fromRow; row <= toRow; row++) {
-            let drawY = this.rowTops[row] - scrollY;
+            let drawY = this.grid.rowTops[row] - scrollY;
             let rowHeight = this.rowHeights[row] || this.options.defaultRowHeight;
             // Skip off-screen rows
             if (drawY + rowHeight <= headerHeight || drawY >= viewPort.height) {
@@ -609,7 +604,7 @@ export class Renderer {
             this.ctx.globalAlpha = 0.2;
             // Loop through all visible columns for this row
             for (let col = startCol; col <= endCol; col++) {
-                let drawX = this.colLefts[col] - scrollX;
+                let drawX = this.grid.colLefts[col] - scrollX;
                 let cellWidth = this.columnWidths[col] || this.options.defaultColWidth;
                 // Skip off-screen cells
                 if (drawX + cellWidth <= dynamicHeaderWidth || drawX >= viewPort.width) {
@@ -636,8 +631,8 @@ export class Renderer {
         }
         this.ctx.restore();
         // Draw row and column header highlights
-        this.drawRowHeaderHighlights(fromRow, toRow, viewPort, this.rowTops);
-        this.drawColumnHeadersForRowSelection(viewPort, this.colLefts);
+        this.drawRowHeaderHighlights(fromRow, toRow, viewPort, this.grid.rowTops);
+        this.drawColumnHeadersForRowSelection(viewPort, this.grid.colLefts);
     }
     /**
      * Draws highlights for the row headers based on the selected row range.
@@ -656,34 +651,30 @@ export class Renderer {
         this.ctx.save();
         // Clip to content area (excluding headers)
         this.clipRowHeadersOnly(this.ctx, viewport);
-        this.ctx.fillStyle = COLORS.selectedCellBackground;
         for (let row = fromRow; row <= toRow; row++) {
             let drawY = rowTops[row] - scrollY;
             let rowHeight = this.rowHeights[row];
+            this.ctx.fillStyle = COLORS.selectedHeaderBackground;
             // Only draw header highlight if the row is visible
             if (drawY + rowHeight >= headerHeight && drawY <= viewport.height) {
                 this.ctx.fillRect(0, drawY, dynamicHeaderWidth, rowHeight);
-            }
-        }
-        this.ctx.restore();
-        // Draw the right border of the row headers outside the clipped region
-        this.ctx.save();
-        this.ctx.lineWidth = CONFIG.selectedLineWidth;
-        this.ctx.strokeStyle = COLORS.selectedCellOutline;
-        for (let row = fromRow; row <= toRow; row++) {
-            let drawY = rowTops[row] - scrollY;
-            let rowHeight = this.rowHeights[row];
-            // Only draw border if the row is visible and doesn't overlap top-left corner
-            if (drawY + rowHeight >= headerHeight && drawY <= viewport.height) {
-                this.ctx.beginPath();
-                // For 2px lines, adjust alignment differently
-                const alignX = Math.floor(dynamicHeaderWidth);
-                // Ensure the line doesn't extend into the top-left corner
-                const lineStartY = Math.max(drawY, headerHeight);
-                const lineEndY = Math.min(drawY + rowHeight, viewport.height);
-                this.ctx.moveTo(alignX, lineStartY);
-                this.ctx.lineTo(alignX, lineEndY);
-                this.ctx.stroke();
+                // Draw header text
+                this.ctx.fillStyle = COLORS.selectedHeaderText;
+                this.ctx.textAlign = "right";
+                this.ctx.textBaseline = CONFIG.textBaseline;
+                this.ctx.fillStyle = COLORS.selectedHeaderText;
+                this.ctx.font = CONFIG.headerFont;
+                const label = String(row + 1);
+                this.ctx.fillText(label, dynamicHeaderWidth - 5, drawY + rowHeight / 2);
+                // Draw inner white separator if not top or bottom
+                if (row > fromRow && row <= toRow) {
+                    this.ctx.strokeStyle = COLORS.selectedHeaderGridLines || "#ffffff";
+                    this.ctx.lineWidth = CONFIG.lineWidth;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, Math.floor(drawY) + 0.5);
+                    this.ctx.lineTo(dynamicHeaderWidth, Math.floor(drawY) + 0.5);
+                    this.ctx.stroke();
+                }
             }
         }
         this.ctx.restore();
@@ -766,7 +757,7 @@ export class Renderer {
         const originRowVisible = originRow >= startRow && originRow <= endRow;
         // Loop through selected columns and visible rows
         for (let col = fromCol; col <= toCol; col++) {
-            let drawX = this.colLefts[col] - scrollX;
+            let drawX = this.grid.colLefts[col] - scrollX;
             let colWidth = this.columnWidths[col] || this.options.defaultColWidth;
             // Skip off-screen columns
             if (drawX + colWidth <= dynamicHeaderWidth || drawX >= viewPort.width) {
@@ -774,7 +765,7 @@ export class Renderer {
             }
             // Loop through all visible rows for this column
             for (let row = startRow; row <= endRow; row++) {
-                let drawY = this.rowTops[row] - scrollY;
+                let drawY = this.grid.rowTops[row] - scrollY;
                 let cellHeight = this.rowHeights[row] || this.options.defaultRowHeight;
                 // Skip off-screen cells
                 if (drawY + cellHeight <= headerHeight || drawY >= viewPort.height) {
@@ -804,8 +795,8 @@ export class Renderer {
         }
         this.ctx.restore();
         // Draw row and column header highlights
-        this.drawColumnHeaderHighlights(fromCol, toCol, viewPort, this.colLefts);
-        this.drawRowHeaderHighlightsForColumnSelection(viewPort, this.rowTops);
+        this.drawColumnHeaderHighlights(fromCol, toCol, viewPort, this.grid.colLefts);
+        this.drawRowHeaderHighlightsForColumnSelection(viewPort, this.grid.rowTops);
     }
     /**
      * Draws highlights for the column headers based on the selected column range.
@@ -824,34 +815,28 @@ export class Renderer {
         this.ctx.save();
         // Clip out the top-left corner
         this.clipColumnHeadersOnly(this.ctx, viewport);
-        this.ctx.fillStyle = COLORS.selectedCellBackground;
         for (let col = fromCol; col <= toCol; col++) {
             let drawX = colLefts[col] - scrollX;
             let colWidth = this.columnWidths[col];
+            this.ctx.fillStyle = COLORS.selectedHeaderBackground;
             // Only draw header highlight if the column is visible
             if (drawX + colWidth >= dynamicHeaderWidth && drawX <= viewport.width) {
                 this.ctx.fillRect(drawX, 0, colWidth, headerHeight);
-            }
-        }
-        this.ctx.restore();
-        // Draw the bottom border of the column headers outside the clipped region
-        this.ctx.save();
-        this.ctx.lineWidth = CONFIG.selectedLineWidth;
-        this.ctx.strokeStyle = COLORS.selectedCellOutline;
-        for (let col = fromCol; col <= toCol; col++) {
-            let drawX = colLefts[col] - scrollX;
-            let colWidth = this.columnWidths[col];
-            // Only draw border if the column is visible and doesn't overlap top-left corner
-            if (drawX + colWidth >= dynamicHeaderWidth && drawX <= viewport.width) {
-                this.ctx.beginPath();
-                // For 2px lines, adjust alignment differently
-                const alignY = Math.floor(headerHeight);
-                // Ensure the line doesn't extend into the top-left corner
-                const lineStartX = Math.max(drawX, dynamicHeaderWidth);
-                const lineEndX = Math.min(drawX + colWidth, viewport.width);
-                this.ctx.moveTo(lineStartX, alignY);
-                this.ctx.lineTo(lineEndX, alignY);
-                this.ctx.stroke();
+                // Draw header text
+                this.ctx.fillStyle = COLORS.selectedHeaderText;
+                this.ctx.textAlign = "center";
+                this.ctx.textBaseline = CONFIG.textBaseline;
+                const label = this.getColumnLabel(col);
+                this.ctx.fillText(label, drawX + colWidth / 2, headerHeight / 2);
+                // Draw inner white separator if not first or last column
+                if (col >= fromCol && col <= toCol) {
+                    this.ctx.strokeStyle = COLORS.selectedHeaderGridLines || "#ffffff";
+                    this.ctx.lineWidth = CONFIG.lineWidth;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(Math.floor(drawX) + 0.5, 0);
+                    this.ctx.lineTo(Math.floor(drawX) + 0.5, headerHeight);
+                    this.ctx.stroke();
+                }
             }
         }
         this.ctx.restore();
@@ -902,9 +887,14 @@ export class Renderer {
         }
         this.ctx.restore();
     }
+    /**
+     * Draws the select all rectangle on the canvas.
+     * It draws a rectangle around the entire grid and highlights the row and column headers.
+     * @param {Viewport} viewPort - The current viewport dimensions and scroll position.
+     * @returns {void}
+     */
     drawSelectAll(viewPort) {
         const selection = this.grid.selection;
-        console.log(selection);
         if (!selection || selection.type !== "all") {
             return; // Only handle select all
         }
@@ -923,8 +913,8 @@ export class Renderer {
         this.ctx.fillRect(x, y, width, height);
         // Check if origin cell (0,0) is visible and clear it if needed
         const { scrollX, scrollY } = viewPort;
-        const originCellX = this.colLefts[0] - scrollX;
-        const originCellY = this.rowTops[0] - scrollY;
+        const originCellX = this.grid.colLefts[0] - scrollX;
+        const originCellY = this.grid.rowTops[0] - scrollY;
         const originCellWidth = this.columnWidths[0] || this.options.defaultColWidth;
         const originCellHeight = this.rowHeights[0] || this.options.defaultRowHeight;
         // Check if the origin cell (0,0) is actually visible in the viewport
@@ -944,15 +934,96 @@ export class Renderer {
                 this.ctx.clearRect(visibleX, visibleY, visibleWidth, visibleHeight);
             }
         }
-        // Draw the border around the selection rectangle
+        //Draw the border around the content area
         this.ctx.globalAlpha = 1.0;
         this.ctx.strokeStyle = COLORS.selectedCellOutline;
         this.ctx.lineWidth = CONFIG.selectedLineWidth;
         this.ctx.strokeRect(x, y, width, height);
-        //Draw the top header row
-        this.ctx.fillStyle = COLORS.selectedCellBackground;
-        this.ctx.fillRect(dynamicHeaderWidth, 0, width, this.options.headerHeight);
-        // Draw the left header column
-        this.ctx.fillRect(0, this.options.headerHeight, dynamicHeaderWidth, height);
+        this.ctx.restore();
+        // Draw column and row header highlights with labels and grid lines
+        this.drawColumnHeaderHighlightsForSelectAll(viewPort);
+        this.drawRowHeaderHighlightsForSelectAll(viewPort);
+    }
+    /**
+     * Draws column header highlights for select all with background, labels, and grid lines.
+     * @param {Viewport} viewport - The current viewport dimensions and scroll position.
+     * @returns {void}
+     */
+    drawColumnHeaderHighlightsForSelectAll(viewport) {
+        const { scrollX } = viewport;
+        const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewport);
+        const { startCol, endCol } = this.getvisibleRange(viewport);
+        // 1. Draw background
+        this.ctx.fillStyle = COLORS.selectedHeaderBackground;
+        this.ctx.fillRect(dynamicHeaderWidth, 0, viewport.width - dynamicHeaderWidth, this.options.headerHeight);
+        // 2. Draw header labels
+        this.ctx.fillStyle = COLORS.selectedHeaderText;
+        this.ctx.textAlign = "center";
+        this.ctx.textBaseline = CONFIG.textBaseline;
+        this.ctx.font = CONFIG.headerFont;
+        for (let col = startCol; col <= endCol; col++) {
+            let drawX = this.grid.colLefts[col] - scrollX;
+            let colWidth = this.columnWidths[col] || this.options.defaultColWidth;
+            // Only draw header label if the column is visible
+            if (drawX + colWidth > dynamicHeaderWidth && drawX < viewport.width) {
+                const label = this.getColumnLabel(col);
+                this.ctx.fillText(label, drawX + colWidth / 2, this.options.headerHeight / 2);
+            }
+        }
+        // 3. Draw white grid lines
+        this.ctx.strokeStyle = COLORS.selectedHeaderGridLines || "#ffffff";
+        this.ctx.lineWidth = CONFIG.lineWidth;
+        for (let col = startCol; col <= endCol; col++) {
+            let drawX = this.grid.colLefts[col] - scrollX;
+            let colWidth = this.columnWidths[col] || this.options.defaultColWidth;
+            // Draw vertical separator lines between columns
+            if (drawX + colWidth > dynamicHeaderWidth && drawX < viewport.width) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(Math.floor(drawX + colWidth) + 0.5, 0);
+                this.ctx.lineTo(Math.floor(drawX + colWidth) + 0.5, this.options.headerHeight);
+                this.ctx.stroke();
+            }
+        }
+    }
+    /**
+     * Draws row header highlights for select all with background, labels, and grid lines.
+     * @param {Viewport} viewport - The current viewport dimensions and scroll position.
+     * @returns {void}
+     */
+    drawRowHeaderHighlightsForSelectAll(viewport) {
+        const { scrollY } = viewport;
+        const dynamicHeaderWidth = this.getDynamicHeaderWidth(viewport);
+        const { startRow, endRow } = this.getvisibleRange(viewport);
+        // 1. Draw background
+        this.ctx.fillStyle = COLORS.selectedHeaderBackground;
+        this.ctx.fillRect(0, this.options.headerHeight, dynamicHeaderWidth, viewport.height - this.options.headerHeight);
+        // 2. Draw header labels
+        this.ctx.fillStyle = COLORS.selectedHeaderText;
+        this.ctx.textAlign = "right";
+        this.ctx.textBaseline = CONFIG.textBaseline;
+        this.ctx.font = CONFIG.headerFont;
+        for (let row = startRow; row <= endRow; row++) {
+            let drawY = this.grid.rowTops[row] - scrollY;
+            let rowHeight = this.rowHeights[row] || this.options.defaultRowHeight;
+            // Only draw header label if the row is visible
+            if (drawY + rowHeight > this.options.headerHeight && drawY < viewport.height) {
+                const label = String(row + 1);
+                this.ctx.fillText(label, dynamicHeaderWidth - 5, drawY + rowHeight / 2);
+            }
+        }
+        // 3. Draw white grid lines
+        this.ctx.strokeStyle = COLORS.selectedHeaderGridLines || "#ffffff";
+        this.ctx.lineWidth = CONFIG.lineWidth;
+        for (let row = startRow; row <= endRow; row++) {
+            let drawY = this.grid.rowTops[row] - scrollY;
+            let rowHeight = this.rowHeights[row] || this.options.defaultRowHeight;
+            // Draw horizontal separator lines between rows
+            if (drawY + rowHeight > this.options.headerHeight && drawY < viewport.height) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, Math.floor(drawY + rowHeight) + 0.5);
+                this.ctx.lineTo(dynamicHeaderWidth, Math.floor(drawY + rowHeight) + 0.5);
+                this.ctx.stroke();
+            }
+        }
     }
 }

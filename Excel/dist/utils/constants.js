@@ -11,10 +11,12 @@ export const COLORS = {
     headerText: "#000000",
     cellBackground: "#ffffff",
     cellText: "#000000",
-    selectedCellOutline: "rgba(102, 240, 97, 1)",
-    selectedCellBackground: "rgba(102, 240, 97, 0.3)",
-    selectedHeaderBackground: "rgba(4, 83, 1, 1)",
+    selectedCellOutline: "rgb(16, 124, 65)",
+    selectedCellBackground: "rgba(16, 124, 65, 0.3)",
+    selectedCellHeaderBackground: "rgba(16, 124, 65, 0.5)",
+    selectedHeaderBackground: "rgb(16, 124, 65)",
     selectedHeaderText: "rgba(255, 255, 255, 1)",
+    selectedHeaderGridLines: "rgba(255, 255, 255, 1)",
 };
 // Configuration for rendering styles
 export const CONFIG = {

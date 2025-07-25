@@ -2,7 +2,8 @@ import { Renderer } from "./Renderer.js";
 import { SelectionManager } from "./selection/SelectionManager.js";
 import { HitTestManager } from "./hittest/HitTestManager.js";
 import { CellHitTestHandler, ColumnHeaderHitTestHandler, RowHitTestHandler, TopLeftCellHitTestHandler } from "./hittest/Handlers.js";
-import { PointerEventManager } from "./pointerEventHandlers.js";
+import { PointerEventManager } from "./eventHandlers/pointerEvents.js";
+import { EditEventsManager } from "./eventHandlers/editEvents.js";
 /**
  * Grid class that manages the rendering of a grid with scrollable functionality.
  * It initializes a canvas, sets up the viewport, and handles scrolling.
@@ -17,6 +18,10 @@ export class Grid {
         this.options = options;
         /** @type {number} - Device Pixel Ratio for high DPI displays */
         this.dpr = window.devicePixelRatio || 1;
+        /** @type {Array<number>} - Prefix Sum of the row heights */
+        this.rowTops = [];
+        /** @type {Array<number>} - Prefix Sum of the column widths */
+        this.colLefts = [];
         /** @type {CellSelectionConfig | null} - Stores the current cell selection configuration */
         this.selection = null;
         /** @type {{ x: number, y: number } | null} - To get the latest Pointer Position for auto-scrolling */
@@ -35,6 +40,7 @@ export class Grid {
         // Initialize column widths and row heights based on options
         this.columnWidths = Array(options.totalCols).fill(options.defaultColWidth);
         this.rowHeights = Array(options.totalRows).fill(options.defaultRowHeight);
+        // Calculate prefix sums for row heights and column widths
         // Create the Canvas element dynamically
         this.canvas = document.createElement('canvas');
         this.ctx = this.canvas.getContext('2d');
@@ -49,14 +55,14 @@ export class Grid {
         // Scale the context for high DPI displays
         this.ctx.scale(this.dpr, this.dpr);
         // Create a Scrollable container
-        const scrollContainer = document.createElement('div');
-        scrollContainer.className = 'scrollable';
+        this.scrollContainer = document.createElement('div');
+        this.scrollContainer.className = 'scrollable';
         // Calculate the total width and height of the grid based on column and row dimensions
         const { totalWidth, totalHeight } = this.getTotalDimensions(options);
-        scrollContainer.style.overflow = 'auto';
-        scrollContainer.style.width = this.viewport.width + 'px';
-        scrollContainer.style.height = this.viewport.height + 'px';
-        scrollContainer.style.position = 'relative';
+        this.scrollContainer.style.overflow = 'auto';
+        this.scrollContainer.style.width = this.viewport.width + 'px';
+        this.scrollContainer.style.height = this.viewport.height + 'px';
+        this.scrollContainer.style.position = 'relative';
         // Create a content div that defines the scrollable area
         const scrollContent = document.createElement('div');
         scrollContent.style.width = totalWidth + 'px';
@@ -65,9 +71,9 @@ export class Grid {
         // Append the Canvas to the main container
         container.appendChild(this.canvas);
         // Append the scroll content to scroll container
-        scrollContainer.appendChild(scrollContent);
+        this.scrollContainer.appendChild(scrollContent);
         // Append the Scrollable container to the main container
-        container.appendChild(scrollContainer);
+        container.appendChild(this.scrollContainer);
         // Pass the Configuration options to the Renderer
         this.renderer = new Renderer(options, this.ctx, this.columnWidths, this.rowHeights, this);
         // Initialize the HitTestManager with all HitTestHandlers
@@ -82,9 +88,11 @@ export class Grid {
         // Rrender the initial grid
         this.renderer.render(this.viewport);
         //Handle scrolling events
-        this.scrollHandler(scrollContainer);
+        this.scrollHandler(this.scrollContainer);
         // Attach pointer events to the canvas for hit testing and selection
-        this.pointerEventManager = new PointerEventManager(this.canvas, scrollContainer, this.selectionManager, this.hitTestManager);
+        this.pointerEventManager = new PointerEventManager(this.canvas, this.scrollContainer, this.selectionManager, this.hitTestManager);
+        //Attach Edit Events for Double Click
+        this.editEventsManager = new EditEventsManager(this.canvas, this, this.hitTestManager);
     }
     /**
      * Add a scroll event listener to the scroll container.
@@ -133,6 +141,63 @@ export class Grid {
         });
         resizeObserver.observe(container);
     }
+    showEditBox(row, col) {
+        const { scrollX, scrollY } = this.viewport;
+        // Calculate the position of the cell based on its row and column indices
+        const cellLeft = this.colLefts[col] - scrollX;
+        const cellTop = this.rowTops[row] - scrollY;
+        const cellWidth = this.columnWidths[col];
+        const cellHeight = this.rowHeights[row];
+        console.log(`Positioning edit box at (${cellLeft}, ${cellTop}) for cell (${row}, ${col})`);
+        console.log(`Cell dimensions: ${cellWidth}x${cellHeight}`);
+        console.log(`Scroll position: (${scrollX}, ${scrollY})`);
+        console.log(`rowTops[${row}]: ${this.rowTops[row]}, colLefts[${col}]: ${this.colLefts[col]}`);
+        //Clean up any existing edit box
+        const existingEditBox = document.getElementById("cell-editor");
+        if (existingEditBox) {
+            existingEditBox.remove();
+        }
+        //Create a New Input Element for Editing
+        const input = document.createElement("input");
+        input.id = "cell-editor";
+        input.type = "text";
+        const inputStyle = {
+            position: "absolute",
+            left: `${cellLeft}px`,
+            top: `${cellTop}px`,
+            width: `${cellWidth}px`,
+            height: `${cellHeight}px`,
+            border: "1px solid #ccc",
+            padding: "4px",
+            boxSizing: "border-box",
+            zIndex: "1000",
+            backgroundColor: "white"
+        };
+        Object.assign(input.style, inputStyle);
+        // Append to the main container instead of scroll container for proper positioning
+        const container = document.getElementById('container');
+        if (container) {
+            container.appendChild(input);
+        }
+        requestAnimationFrame(() => {
+            input.focus();
+            input.select();
+        });
+        input.addEventListener("blur", () => {
+            // TODO: Save data to internal store
+            const value = input.value;
+            console.log(`Cell (${row}, ${col}) edited with value: ${value}`);
+            input.remove(); // Remove the input box after editing
+        });
+        input.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                input.blur();
+            }
+            else if (event.key === "Escape") {
+                input.remove();
+            }
+        });
+    }
     /**
      * Calculate the total dimensions of the grid based on column widths and row heights.
      * @param {GridOptions} options - The grid options containing header dimensions.
@@ -142,16 +207,6 @@ export class Grid {
         const totalWidth = this.columnWidths.reduce((sum, width) => sum + width, options.headerWidth);
         const totalHeight = this.rowHeights.reduce((sum, height) => sum + height, options.headerHeight);
         return { totalWidth, totalHeight };
-    }
-    /**
-     * Scroll the grid by a specified delta in x and y directions.
-     * This method updates the viewport's scroll position and ensures it does not exceed the maximum scroll limits.
-     * @param {number} deltaX - The amount to scroll in the x direction.
-     * @param {number} deltaY - The amount to scroll in the y direction.
-     */
-    scrollBy(deltaX, deltaY) {
-        this.viewport.scrollX = Math.max(0, Math.min(this.viewport.scrollX + deltaX, this.getMaxScrollX()));
-        this.viewport.scrollY = Math.max(0, Math.min(this.viewport.scrollY + deltaY, this.getMaxScrollY()));
     }
     /**
      * Get the maximum scroll limits for the grid.
@@ -170,6 +225,16 @@ export class Grid {
     getMaxScrollY() {
         const { totalHeight } = this.getTotalDimensions(this.options);
         return totalHeight - this.viewport.height;
+    }
+    /**
+     * Scroll the grid by a specified delta in x and y directions.
+     * This method updates the viewport's scroll position and ensures it does not exceed the maximum scroll limits.
+     * @param {number} deltaX - The amount to scroll in the x direction.
+     * @param {number} deltaY - The amount to scroll in the y direction.
+     */
+    scrollBy(deltaX, deltaY) {
+        this.viewport.scrollX = Math.max(0, Math.min(this.viewport.scrollX + deltaX, this.getMaxScrollX()));
+        this.viewport.scrollY = Math.max(0, Math.min(this.viewport.scrollY + deltaY, this.getMaxScrollY()));
     }
     /**
      * Get the HitTestContext for the grid.

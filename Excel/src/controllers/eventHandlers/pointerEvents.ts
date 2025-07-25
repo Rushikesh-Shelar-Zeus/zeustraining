@@ -1,5 +1,5 @@
-import { HitTestManager } from "./hittest/HitTestManager.js";
-import { SelectionManager } from "./selection/SelectionManager.js";
+import { HitTestManager } from "../hittest/HitTestManager.js";
+import { SelectionManager } from "../selection/SelectionManager.js";
 
 /**
  * PointerEventManager class that manages pointer events for the grid.
@@ -60,7 +60,6 @@ export class PointerEventManager {
         // Ignore clicks on the scrollbar
         if (this.isScrollbarClick(e, this.scrollContainer)) return;
 
-        e.preventDefault();
         this.isDragging = true;
 
         // Get the canvas coordinates from the pointer event
@@ -165,8 +164,6 @@ export class PointerEventManager {
 
         // Ignore clicks on the scrollbar
         if (this.isScrollbarClick(e, this.scrollContainer)) return;
-
-        e.preventDefault();
 
         if (!this.isDragging) return;
         this.isDragging = false;
