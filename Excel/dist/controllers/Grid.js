@@ -4,6 +4,7 @@ import { HitTestManager } from "./hittest/HitTestManager.js";
 import { CellHitTestHandler, ColumnHeaderHitTestHandler, RowHitTestHandler, TopLeftCellHitTestHandler } from "./hittest/Handlers.js";
 import { PointerEventManager } from "./eventHandlers/pointerEvents.js";
 import { EditEventsManager } from "./eventHandlers/editEvents.js";
+import { COLORS } from "../utils/constants.js";
 /**
  * Grid class that manages the rendering of a grid with scrollable functionality.
  * It initializes a canvas, sets up the viewport, and handles scrolling.
@@ -92,7 +93,7 @@ export class Grid {
         // Attach pointer events to the canvas for hit testing and selection
         this.pointerEventManager = new PointerEventManager(this.canvas, this.scrollContainer, this.selectionManager, this.hitTestManager);
         //Attach Edit Events for Double Click
-        this.editEventsManager = new EditEventsManager(this.canvas, this, this.hitTestManager);
+        this.editEventsManager = new EditEventsManager(this.scrollContainer, this, this.hitTestManager);
     }
     /**
      * Add a scroll event listener to the scroll container.
@@ -141,6 +142,12 @@ export class Grid {
         });
         resizeObserver.observe(container);
     }
+    /**
+     * Show an edit box for the specified cell.
+     * This method creates an input element positioned over the cell to allow editing.
+     * @param {number} row - The row index of the cell to edit.
+     * @param {number} col - The column index of the cell to edit.
+     */
     showEditBox(row, col) {
         const { scrollX, scrollY } = this.viewport;
         // Calculate the position of the cell based on its row and column indices
@@ -148,10 +155,6 @@ export class Grid {
         const cellTop = this.rowTops[row] - scrollY;
         const cellWidth = this.columnWidths[col];
         const cellHeight = this.rowHeights[row];
-        console.log(`Positioning edit box at (${cellLeft}, ${cellTop}) for cell (${row}, ${col})`);
-        console.log(`Cell dimensions: ${cellWidth}x${cellHeight}`);
-        console.log(`Scroll position: (${scrollX}, ${scrollY})`);
-        console.log(`rowTops[${row}]: ${this.rowTops[row]}, colLefts[${col}]: ${this.colLefts[col]}`);
         //Clean up any existing edit box
         const existingEditBox = document.getElementById("cell-editor");
         if (existingEditBox) {
@@ -161,17 +164,21 @@ export class Grid {
         const input = document.createElement("input");
         input.id = "cell-editor";
         input.type = "text";
+        // Set the input's value to the current cell value
         const inputStyle = {
             position: "absolute",
             left: `${cellLeft}px`,
             top: `${cellTop}px`,
             width: `${cellWidth}px`,
             height: `${cellHeight}px`,
-            border: "1px solid #ccc",
+            border: `1px solid ${COLORS.selectedCellOutline}`,
+            outline: "none",
             padding: "4px",
             boxSizing: "border-box",
             zIndex: "1000",
-            backgroundColor: "white"
+            backgroundColor: "white",
+            fontSize: "14px",
+            fontFamily: "Arial, sans-serif"
         };
         Object.assign(input.style, inputStyle);
         // Append to the main container instead of scroll container for proper positioning
@@ -179,21 +186,21 @@ export class Grid {
         if (container) {
             container.appendChild(input);
         }
+        // Focus the input and select its content
         requestAnimationFrame(() => {
             input.focus();
             input.select();
         });
         input.addEventListener("blur", () => {
             // TODO: Save data to internal store
-            const value = input.value;
-            console.log(`Cell (${row}, ${col}) edited with value: ${value}`);
-            input.remove(); // Remove the input box after editing
+            input.remove();
         });
         input.addEventListener("keydown", (event) => {
             if (event.key === "Enter") {
                 input.blur();
             }
             else if (event.key === "Escape") {
+                input.value = "";
                 input.remove();
             }
         });

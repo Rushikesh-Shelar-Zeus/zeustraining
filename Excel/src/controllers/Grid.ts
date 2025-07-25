@@ -11,6 +11,7 @@ import {
 } from "../utils/types.js";
 import { PointerEventManager } from "./eventHandlers/pointerEvents.js";
 import { EditEventsManager } from "./eventHandlers/editEvents.js";
+import { COLORS } from "../utils/constants.js";
 
 /**
  * Grid class that manages the rendering of a grid with scrollable functionality.
@@ -169,7 +170,7 @@ export class Grid {
 
         //Attach Edit Events for Double Click
         this.editEventsManager = new EditEventsManager(
-            this.canvas,
+            this.scrollContainer,
             this,
             this.hitTestManager
         );
@@ -234,6 +235,12 @@ export class Grid {
         resizeObserver.observe(container);
     }
 
+    /**
+     * Show an edit box for the specified cell.
+     * This method creates an input element positioned over the cell to allow editing.
+     * @param {number} row - The row index of the cell to edit.
+     * @param {number} col - The column index of the cell to edit.
+     */
     public showEditBox(row: number, col: number): void {
 
         const { scrollX, scrollY } = this.viewport;
@@ -243,11 +250,6 @@ export class Grid {
         const cellTop = this.rowTops[row] - scrollY;
         const cellWidth = this.columnWidths[col];
         const cellHeight = this.rowHeights[row];
-
-        console.log(`Positioning edit box at (${cellLeft}, ${cellTop}) for cell (${row}, ${col})`);
-        console.log(`Cell dimensions: ${cellWidth}x${cellHeight}`);
-        console.log(`Scroll position: (${scrollX}, ${scrollY})`);
-        console.log(`rowTops[${row}]: ${this.rowTops[row]}, colLefts[${col}]: ${this.colLefts[col]}`);
 
         //Clean up any existing edit box
         const existingEditBox = document.getElementById("cell-editor");
@@ -260,17 +262,21 @@ export class Grid {
         input.id = "cell-editor";
         input.type = "text";
 
+        // Set the input's value to the current cell value
         const inputStyle: Partial<CSSStyleDeclaration> = {
             position: "absolute",
             left: `${cellLeft}px`,
             top: `${cellTop}px`,
             width: `${cellWidth}px`,
             height: `${cellHeight}px`,
-            border: "1px solid #ccc",
+            border: `1px solid ${COLORS.selectedCellOutline}`,
+            outline: "none",
             padding: "4px",
             boxSizing: "border-box",
             zIndex: "1000",
-            backgroundColor: "white"
+            backgroundColor: "white",
+            fontSize: "14px",
+            fontFamily: "Arial, sans-serif"
         };
 
         Object.assign(input.style, inputStyle);
@@ -281,6 +287,7 @@ export class Grid {
             container.appendChild(input);
         }
 
+        // Focus the input and select its content
         requestAnimationFrame(() => {
             input.focus();
             input.select();
@@ -288,9 +295,7 @@ export class Grid {
 
         input.addEventListener("blur", () => {
             // TODO: Save data to internal store
-            const value = input.value;
-            console.log(`Cell (${row}, ${col}) edited with value: ${value}`);
-            input.remove(); // Remove the input box after editing
+            input.remove();
         });
 
 
@@ -299,6 +304,7 @@ export class Grid {
                 input.blur();
             }
             else if (event.key === "Escape") {
+                input.value = "";
                 input.remove();
             }
         });

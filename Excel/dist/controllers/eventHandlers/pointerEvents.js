@@ -36,6 +36,10 @@ export class PointerEventManager {
             // Ignore clicks on the scrollbar
             if (this.isScrollbarClick(e, this.scrollContainer))
                 return;
+            // Only prevent default for pointer events, not mouse events (to allow double-click)
+            if (e.pointerType !== 'mouse') {
+                e.preventDefault();
+            }
             this.isDragging = true;
             // Get the canvas coordinates from the pointer event
             const rect = this.canvas.getBoundingClientRect();
@@ -138,6 +142,7 @@ export class PointerEventManager {
             // Ignore clicks on the scrollbar
             if (this.isScrollbarClick(e, this.scrollContainer))
                 return;
+            e.preventDefault();
             if (!this.isDragging)
                 return;
             this.isDragging = false;
